@@ -10,6 +10,7 @@
 //#include <MemoryFree.h>
 //#include <SdFat.h>
 //serLCD lcd(7);
+// commit to GH test
 
 // items that might go into EEPROM config
 boolean _dataOff=false;
