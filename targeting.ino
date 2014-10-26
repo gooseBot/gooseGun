@@ -1,3 +1,7 @@
+void setMaxRange(){
+	_maxRange = sqrt(((pow(_nozzelVelocity, 4) / _gravity) - 2 * _nozzelAboveGroundDistance*pow(_nozzelVelocity, 2)) / _gravity);
+}
+
 void processScanData() {
   int maxConsecutivei = 0;
   int measure1ft = 0;
@@ -11,9 +15,9 @@ void processScanData() {
   int sumDifferences = 0;
   int lasti = 0;
   int avgi = 0;
+  byte minDistanceToScanner = 3;
   byte avgMeasure = 0;  
   boolean readingAgroup = false;
-  boolean swapInMeasures = false;
 
   // zero out globals used to pass out results of this method
   _angle = 0;
@@ -50,8 +54,9 @@ void processScanData() {
     if (consecutivei > 0 && !readingAgroup) {
       avgi = sumi / consecutivei;
       avgMeasure = float(sumMeasures/consecutivei) + 0.5;  //add .5 then truncate, this rounds the value
-      // don't waste time on targets that are out of range or are moving away 
-      if (avgMeasure <= _maxRange && sumDifferences > 0) {    
+      // don't waste time on targets that are out of range or are moving away, or too close to scanner
+	  //   water drips from the saucer and can cause false targets during ran
+	  if (avgMeasure <= _maxRange && sumDifferences > 0 && avgMeasure >= minDistanceToScanner) {
         if ((maxConsecutivei == 0) || (consecutivei > maxConsecutivei)) {          
           // a larger valid target (or the first one) has been found, compute needed information
           maxConsecutivei = consecutivei;
@@ -112,7 +117,6 @@ void moveServosAndShootTarget()
   
   // will open the valve for about 1 second.  Takes a while for the water to get going.
   // will also wiggle the two servos in a pattern left right up down a few times
-  controlWebCamera();                   // take a picture at start
   digitalWrite(_valveMosfetPin, HIGH);
       for (int repeat=0; repeat<1; repeat+=1)
       {
@@ -130,6 +134,5 @@ void moveServosAndShootTarget()
         } 
      }
   digitalWrite(_valveMosfetPin, LOW);
-  _cameraShotCount++;
 } 
 

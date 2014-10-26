@@ -19,9 +19,13 @@
     <None Include="Agol.ino" />
     <None Include="UDP.ino" />
     <None Include="Utility.ino" />
-    <None Include="camera.ino" />
     <None Include="motionDetect.ino" />
     <None Include="scanner.ino" />
     <None Include="targeting.ino" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Visual Micro\.gooseGun.vsarduino.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

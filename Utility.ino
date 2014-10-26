@@ -4,7 +4,7 @@ void myDelay(int mseconds) {
   //   not sure why.
   unsigned long starttime = millis();   //going to count for a fixed time
   unsigned long endtime = starttime;
-  while ((endtime - starttime) <= mseconds) // do the loop
+  while ((endtime - starttime) <= (unsigned long) mseconds) // do the loop
   {
     endtime = millis();                  //keep the arduino awake.
   }  

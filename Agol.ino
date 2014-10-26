@@ -1,3 +1,8 @@
+//float _scannerX = 1002152;         //scanner x location in wa state plane south inside house
+//float _scannerY = 692505;          //scanner y location in wa state plane south inside house
+float _scannerX = 1002185;         //scanner x location in wa state plane south in yard
+float _scannerY = 692538;          //scanner y location in wa state plane south in yard
+
 void postDataToAgol(byte scanType) {
   int contentLength=0;
   

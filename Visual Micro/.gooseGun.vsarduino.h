@@ -50,11 +50,11 @@ void getStatePlaneCoords(int radius, float angleInDeg, float &pointX, float &poi
 void sendUDP(byte *response, int responseSize);
 void listenForUDP ();
 void myDelay(int mseconds);
-void controlWebCamera();
 boolean getXbandRate(boolean resetRollingAvgNumbers);
 void onPulse();
 void getScanData (boolean getBaseScan);
 void controlDoor(boolean doorOpen);
+void setMaxRange();
 void processScanData();
 void moveServosAndShootTarget();
 
@@ -64,7 +64,6 @@ void moveServosAndShootTarget();
 #include "C:\Users\Eric\Documents\Arduino\gooseGun\Agol.ino"
 #include "C:\Users\Eric\Documents\Arduino\gooseGun\UDP.ino"
 #include "C:\Users\Eric\Documents\Arduino\gooseGun\Utility.ino"
-#include "C:\Users\Eric\Documents\Arduino\gooseGun\camera.ino"
 #include "C:\Users\Eric\Documents\Arduino\gooseGun\motionDetect.ino"
 #include "C:\Users\Eric\Documents\Arduino\gooseGun\scanner.ino"
 #include "C:\Users\Eric\Documents\Arduino\gooseGun\targeting.ino"

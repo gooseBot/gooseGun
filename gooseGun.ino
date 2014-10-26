@@ -14,10 +14,7 @@
 
 // items that might go into EEPROM config
 boolean _dataOff=false;
-//float _scannerX = 1002152;         //scanner x location in wa state plane south inside house
-//float _scannerY = 692505;          //scanner y location in wa state plane south inside house
-float _scannerX = 1002185;         //scanner x location in wa state plane south in yard
-float _scannerY = 692538;          //scanner y location in wa state plane south in yard
+
 float _scannerAngle2statePlane = 22.0*71/4068;   // scanner angle to statePlane in yard
 float _nozzelVelocity = 30.0;        //feet/sec - Seems accurate for yard
 //float _nozzelVelocity = 20.0;        //feet/sec - indoor testing
@@ -29,7 +26,6 @@ boolean _disableGun=false;
 // all other globals
 char _packetBuffer[UDP_TX_PACKET_MAX_SIZE];      //buffer to hold incoming packet,    
 long _uuidNumber=0;                   // a unique number to help track attack sessions and their data
-byte _cameraShotCount=0;
 const int _bytesPerScan = 720;
 const int _numScanReturns = 360;
 byte _baseScan[_numScanReturns];
@@ -70,7 +66,7 @@ EthernetClient _ethernetClient;
 void setup()                    // run once, when the sketch starts
 {
   byte _mac[] = {0x90,0xA2,0xDA,0x0E,0x70,0x30};
-  IPAddress _ip(192,168,1,178);            // ip address from my router  
+  IPAddress _ip(192,168,1,178);            // ip address from my router not using dhcp
   Ethernet.begin(_mac,_ip);
   delay(1000); 
   _Udp.begin(8888);  
@@ -81,7 +77,6 @@ void setup()                    // run once, when the sketch starts
   _doorServo.attach(_bucketDoorPin,950,2025);  
   _doorServo.write(90);
   myDelay(500);
-  // now close the door.
   controlDoor(false);  //close door
   
   // ensure valve and scanner are off
@@ -91,10 +86,7 @@ void setup()                    // run once, when the sketch starts
   digitalWrite(_valveMosfetPin, LOW);  
   
   //max range for current water velocity
-  _maxRange = sqrt(((pow(_nozzelVelocity,4)/_gravity) - 2*_nozzelAboveGroundDistance*pow(_nozzelVelocity,2))/_gravity);  
-  
-  //take a picture for testing
-  controlWebCamera();
+  setMaxRange();
 }
 
 void loop()                          
@@ -108,9 +100,7 @@ void loop()
   // if scanner off, and we have motion, and more then 10min since last attack, then turn on scanner
   unsigned long timeNow = millis();
   if (movement && _scannerOff && (((timeNow-_lastAttackTime)>_disarmTimeSpan) || _kidMode)) {   
-    _uuidNumber = TrueRandom.random();            // setup a random (for this date at least) ID for this session.    
-    controlWebCamera();
-    _cameraShotCount=1;                                  // make sure shotCount starts at 1                             
+    _uuidNumber = TrueRandom.random();            // setup a random (for this date at least) ID for this session.      
     //open door
     controlDoor(true);
     //enable nozzle servos
@@ -156,8 +146,7 @@ void loop()
       _bottomServo.detach();      
       _scannerOff = true;      
       _lastAttackTime = millis();    //reset last attack time 
-      _disarmTimeSpan = 600000UL;    //set disarm time period to 10 min
-      _cameraShotCount=1;                 
+      _disarmTimeSpan = 600000UL;    //set disarm time period to 10 min              
       //wait for servos to finish relaxing before starting up detection, otherwise motion gets
       //  caught and rolling average is in accurate.
       delay(1000);                                                 

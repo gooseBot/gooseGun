@@ -67,8 +67,11 @@ boolean getXbandRate(boolean resetRollingAvgNumbers)
         _pulsesPerSecAvg = 15;                                
         if (_hist.frequency(4)>=0.010) {                      // if the histogram "4 and 5s" greater than 1% then its raining really hard
           _pulsesPerSecAvg = 18;                              
-          if (_hist.frequency(5)>=0.010) {                      // if the histogram "4 and 5s" greater than 1% then its raining really hard
-            _pulsesPerSecAvg = 21;                              
+          if (_hist.frequency(5)>=0.010) {                      // if the histogram "5-10" greater than 1% then its raining really hard
+            _pulsesPerSecAvg = 21;     
+			if (_hist.frequency(6) >= 0.010) {                      // if the histogram "10-20" greater than 1% then its raining really hard
+				_pulsesPerSecAvg = 30;
+			}
           }
         }
       }

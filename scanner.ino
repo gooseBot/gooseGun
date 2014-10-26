@@ -1,3 +1,5 @@
+
+
 void getScanData (boolean getBaseScan) {
   
   int c=0;   //count for finding measures header 
