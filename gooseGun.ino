@@ -2,7 +2,7 @@
 #include <SPI.h>                 // needed for Arduino versions later than 0018
 #include <Ethernet.h>
 #include <EthernetUdp.h>         // UDP library from: bjoern@cs.stanford.edu 12/30/2008
-#include <TrueRandom.h>
+#include "TrueRandom.h"
 #include <Average.h>
 #include <histogram.h>
 //#include <SoftwareSerial.h>
