@@ -14,11 +14,6 @@
 
 // items that might go into EEPROM config
 boolean _dataOff=false;
-
-float _scannerAngle2statePlane = 22.0*71/4068;   // scanner angle to statePlane in yard
-float _nozzelVelocity = 30.0;        //feet/sec - Seems accurate for yard
-//float _nozzelVelocity = 20.0;        //feet/sec - indoor testing
-float _nozzelAboveGroundDistance = -3;  
 // kid mode disables most time outs.  the 5 minute attack timeout and the 10 min rest are disabled
 boolean _kidMode=false;                
 boolean _disableGun=false;
@@ -26,19 +21,17 @@ boolean _disableGun=false;
 // all other globals
 char _packetBuffer[UDP_TX_PACKET_MAX_SIZE];      //buffer to hold incoming packet,    
 long _uuidNumber=0;                   // a unique number to help track attack sessions and their data
-const int _bytesPerScan = 720;
+
 const int _numScanReturns = 360;
 byte _baseScan[_numScanReturns];
 byte _scan[_numScanReturns];
-byte _tiltServoNeutralAngle = 110;
-float _gravity = 32.0;               //feet/sec/sec
 float _maxRange = 0;
 float _angle=0;
 byte _distance=0;
 long _totDifferences=0;
 float _arcLength=0;
 byte _scannerMosfetPin = 8;                 
-byte _valveMosfetPin = 4;
+
 byte _bucketDoorPin = 6;
 byte _bottomServoPin = 9;
 byte _topServoPin = 5;  
@@ -58,8 +51,7 @@ unsigned long _lastTargetTime = 0;
 unsigned long _lastAttackTime = 0;
 unsigned long _disarmTimeSpan = 0;
 unsigned long _attackStartTime = 0;
-double xBandBuckets[] = {0,1,2,3,5,10,20,1000 };
-Histogram _hist(8, xBandBuckets);
+
 EthernetUDP _Udp;
 EthernetClient _ethernetClient;
 
@@ -80,10 +72,9 @@ void setup()                    // run once, when the sketch starts
   controlDoor(false);  //close door
   
   // ensure valve and scanner are off
-  pinMode(_scannerMosfetPin, OUTPUT);      
-  pinMode(_valveMosfetPin, OUTPUT);      
+  initValveAndTurnOff();
+  pinMode(_scannerMosfetPin, OUTPUT);
   digitalWrite(_scannerMosfetPin, LOW);
-  digitalWrite(_valveMosfetPin, LOW);  
   
   //max range for current water velocity
   setMaxRange();
@@ -105,8 +96,8 @@ void loop()
     controlDoor(true);
     //enable nozzle servos
     _bottomServo.attach(_bottomServoPin,544,2400);  
-    _topServo.attach(_topServoPin,1050,2400);     
-    _topServo.write(_tiltServoNeutralAngle);       // put tilt servo at "level" position 
+    _topServo.attach(_topServoPin,1050,2400);    
+	initializeNozzelPosition();
     myDelay(100);                                  // give tilt servo time to move
     digitalWrite(_scannerMosfetPin, HIGH);    // turn on the scanner    
     delay(9000);                              // wait for scanner to go green

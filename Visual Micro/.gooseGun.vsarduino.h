@@ -50,11 +50,14 @@ void getStatePlaneCoords(int radius, float angleInDeg, float &pointX, float &poi
 void sendUDP(byte *response, int responseSize);
 void listenForUDP ();
 void myDelay(int mseconds);
+Histogram getHist();
 boolean getXbandRate(boolean resetRollingAvgNumbers);
 void onPulse();
 void getScanData (boolean getBaseScan);
 void controlDoor(boolean doorOpen);
 void setMaxRange();
+void initializeNozzelPosition();
+void initValveAndTurnOff();
 void processScanData();
 void moveServosAndShootTarget();
 

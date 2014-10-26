@@ -2,6 +2,8 @@
 //float _scannerY = 692505;          //scanner y location in wa state plane south inside house
 float _scannerX = 1002185;         //scanner x location in wa state plane south in yard
 float _scannerY = 692538;          //scanner y location in wa state plane south in yard
+float _scannerAngle2statePlane = 22.0 * 71 / 4068;   // scanner angle to statePlane in yard
+
 
 void postDataToAgol(byte scanType) {
   int contentLength=0;
@@ -109,7 +111,9 @@ int sendScanData(int scanType) {
   dataLength+=_ethernetClient.print(_uuidNumber);   
   dataLength+=_ethernetClient.print(F(",\"messages\":"));  
   //save a histogram of motion sensor readings for debuging
-  dataLength+=_ethernetClient.print(F("'"));  
+  dataLength+=_ethernetClient.print(F("'")); 
+  //get the histogram from motionDetect 
+  Histogram _hist = getHist();
   dataLength+=_ethernetClient.print(_hist.bucket(0));
   dataLength+=_ethernetClient.print(F("-"));  
   dataLength+=_ethernetClient.print(_hist.frequency(0));  

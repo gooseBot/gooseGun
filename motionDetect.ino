@@ -1,3 +1,10 @@
+double xBandBuckets[] = { 0, 1, 2, 3, 5, 10, 20, 1000 };
+Histogram _hist(8, xBandBuckets);
+
+Histogram getHist(){
+	return _hist;
+}
+
 boolean getXbandRate(boolean resetRollingAvgNumbers)
 {
   _pulsesPerSec=0;                       //reset the count

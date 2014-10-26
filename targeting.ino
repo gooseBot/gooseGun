@@ -1,5 +1,21 @@
+float _nozzelVelocity = 30.0;        //feet/sec - Seems accurate for yard
+//float _nozzelVelocity = 20.0;        //feet/sec - indoor testing
+float _nozzelAboveGroundDistance = -3;
+byte _tiltServoNeutralAngle = 110;
+float _gravity = 32.0;               //feet/sec/sec
+byte _valveMosfetPin = 4;
+
 void setMaxRange(){
-	_maxRange = sqrt(((pow(_nozzelVelocity, 4) / _gravity) - 2 * _nozzelAboveGroundDistance*pow(_nozzelVelocity, 2)) / _gravity);
+  _maxRange = sqrt(((pow(_nozzelVelocity, 4) / _gravity) - 2 * _nozzelAboveGroundDistance*pow(_nozzelVelocity, 2)) / _gravity);
+}
+
+void initializeNozzelPosition() {
+  _topServo.write(_tiltServoNeutralAngle);       // put tilt servo at "level" position 
+}
+
+void initValveAndTurnOff(){
+  pinMode(_valveMosfetPin, OUTPUT);
+  digitalWrite(_valveMosfetPin, LOW);
 }
 
 void processScanData() {

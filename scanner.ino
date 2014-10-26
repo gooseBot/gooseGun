@@ -13,6 +13,7 @@ void getScanData (boolean getBaseScan) {
   boolean readMeasureBytes=false;  
   byte measuresHeader[] = {0x2,0x80,0xD6,0x2,0xB0,0x69,0x1};
   boolean done = false;
+  const int _bytesPerScan = 720;
   
   // Used PLS/LSI software to set permanent baud.  See Help topic in software on how to do this via SICK Diagnosis
   //   If decide to use temporary method must be in setup mode first (sends password which is SICK_PLS)  
