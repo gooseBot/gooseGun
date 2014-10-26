@@ -10,7 +10,6 @@
 //#include <MemoryFree.h>
 //#include <SdFat.h>
 //serLCD lcd(7);
-// commit to GH test
 
 // items that might go into EEPROM config
 boolean _dataOff=false;
@@ -57,27 +56,10 @@ EthernetClient _ethernetClient;
 
 void setup()                    // run once, when the sketch starts
 {
-  byte _mac[] = {0x90,0xA2,0xDA,0x0E,0x70,0x30};
-  IPAddress _ip(192,168,1,178);            // ip address from my router not using dhcp
-  Ethernet.begin(_mac,_ip);
-  delay(1000); 
-  _Udp.begin(8888);  
-  
-  // this code moves door servo to 90 degrees initially seems to be needed.  Otherwise open/close
-  //    code doesnt seem to work.  This servo is a waterproof servo and was modified by 
-  //    servo city to work at 180 degrees, maybe this is part of the reason?
-  _doorServo.attach(_bucketDoorPin,950,2025);  
-  _doorServo.write(90);
-  myDelay(500);
-  controlDoor(false);  //close door
-  
-  // ensure valve and scanner are off
-  initValveAndTurnOff();
-  pinMode(_scannerMosfetPin, OUTPUT);
-  digitalWrite(_scannerMosfetPin, LOW);
-  
-  //max range for current water velocity
-  setMaxRange();
+  initializeUPD();         //setup UDP
+  controlDoor(false);      //ensure door is closed (in case of power outage on prior run)
+  controlScanner(false);   //ensure scanner is also off
+  initializeTargeting();
 }
 
 void loop()                          
@@ -92,27 +74,15 @@ void loop()
   unsigned long timeNow = millis();
   if (movement && _scannerOff && (((timeNow-_lastAttackTime)>_disarmTimeSpan) || _kidMode)) {   
     _uuidNumber = TrueRandom.random();            // setup a random (for this date at least) ID for this session.      
-    //open door
-    controlDoor(true);
-    //enable nozzle servos
-    _bottomServo.attach(_bottomServoPin,544,2400);  
-    _topServo.attach(_topServoPin,1050,2400);    
-	initializeNozzelPosition();
-    myDelay(100);                                  // give tilt servo time to move
-    digitalWrite(_scannerMosfetPin, HIGH);    // turn on the scanner    
-    delay(9000);                              // wait for scanner to go green
-    // Used PLS/LSI software to set permanent baud.  See Help topic in software on how to do this via SICK Diagnosis
-    //   If decide to use temporary method must be in setup mode first (sends password which is SICK_PLS)  
-    byte startMeasures[] = {0x2,0x0,0x2,0x0,0x20,0x24,0x34,0x8};
-    Serial.begin(38400,SERIAL_8E1);   
-    Serial.write(startMeasures,sizeof(startMeasures));  //request all scan data continuously  
-    Serial.end();
+    controlDoor(true);                            //open scanner door 
+    controlNozzelServos(true);                    // get pan and tilt nozzel servos going
+	  controlScanner(true);                          // turn on scanner
+
     //keep track of scanner on time, will turn it off if nothing happens for a while
     _lastTargetTime = millis();       
     _attackStartTime = millis();              //keep track of when the attack begain    
     getScanData(_base);                       //get one scan and save it to array    
     postDataToAgol(_base);                    // save scan to agol
-    _scannerOff = false;
   }
   // start targeting if scanner is on
   if (!_scannerOff) {
@@ -125,22 +95,16 @@ void loop()
         if (_distance > 0) {
           _lastTargetTime = millis();          
           moveServosAndShootTarget();  
-          postDataToAgol(_targets);          // if shot at something then post the fact
+          postDataToAgol(_targets);            // if shot at something then post the fact
           //postDataToAgol(_currentScan);          // for troubleshooting also post the current scan
         }    
     } else {
       //nothing has happend for 2 minutes or we have attacked more than 5 minutes
-      Serial.end();
-      digitalWrite(_scannerMosfetPin, LOW);   // turn off the scanner
+      controlScanner(false);                  // turn off the scanner
       controlDoor(false);                     // and close the door
-      _topServo.detach();  
-      _bottomServo.detach();      
-      _scannerOff = true;      
-      _lastAttackTime = millis();    //reset last attack time 
-      _disarmTimeSpan = 600000UL;    //set disarm time period to 10 min              
-      //wait for servos to finish relaxing before starting up detection, otherwise motion gets
-      //  caught and rolling average is in accurate.
-      delay(1000);                                                 
+      controlNozzelServos(false);           
+      _lastAttackTime = millis();              //reset last attack time 
+      _disarmTimeSpan = 600000UL;             //set disarm time period to 10 min                                               
       movement=getXbandRate(true);            //reset the running average used to trigger a detection      
     }
   }      

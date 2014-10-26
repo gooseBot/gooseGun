@@ -5,15 +5,25 @@ byte _tiltServoNeutralAngle = 110;
 float _gravity = 32.0;               //feet/sec/sec
 byte _valveMosfetPin = 4;
 
-void setMaxRange(){
+void controlNozzelServos(boolean turnOn) {
+  if (turnOn) {
+    _bottomServo.attach(_bottomServoPin, 544, 2400);
+    _topServo.attach(_topServoPin, 1050, 2400);
+    _topServo.write(_tiltServoNeutralAngle);       // put tilt servo at "level" position 
+    myDelay(100);                                  // give tilt servo time to move
+  }
+  else {
+    _topServo.detach();
+    _bottomServo.detach();
+    //wait for servos to finish relaxing before starting up, otherwise motion gets
+    //  caught by the sensor and rolling average is not accurate.
+    delay(1000);
+  }
+}
+
+void initializeTargeting(){
+  // maxrange is used elsewhere need it now.
   _maxRange = sqrt(((pow(_nozzelVelocity, 4) / _gravity) - 2 * _nozzelAboveGroundDistance*pow(_nozzelVelocity, 2)) / _gravity);
-}
-
-void initializeNozzelPosition() {
-  _topServo.write(_tiltServoNeutralAngle);       // put tilt servo at "level" position 
-}
-
-void initValveAndTurnOff(){
   pinMode(_valveMosfetPin, OUTPUT);
   digitalWrite(_valveMosfetPin, LOW);
 }
