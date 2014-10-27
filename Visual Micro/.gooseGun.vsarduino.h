@@ -49,7 +49,7 @@ int sendTargetData();
 int sendMessage();
 void getStatePlaneCoords(int radius, float angleInDeg, float &pointX, float &pointY);
 void initializeUPD();
-void sendUDP(byte *response, int responseSize);
+void sendUDP(char *response, int responseSize);
 void listenForUDP ();
 void myDelay(int mseconds);
 Histogram getHistogram();

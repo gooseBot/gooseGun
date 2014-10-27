@@ -39,10 +39,11 @@ volatile int _pulsesPerSec=0;
 float _stdDeviationPulseRate=0;
 float _pulsesPerSecAvg=2;             //start off with something or will get an instant detection.
 boolean _scannerOff = true;
-unsigned long _lastTargetTime = 0;
-unsigned long _lastAttackTime = 0;
-unsigned long _disarmTimeSpan = 0;
-unsigned long _attackStartTime = 0;
+unsigned long lastTargetTime = 0;
+unsigned long lastAttackTime = 0;
+unsigned long disarmTimeSpan = 0;
+unsigned long attackStartTime = 0;
+unsigned long timeNow = 0;
 
 EthernetUDP _Udp;                 //must be a global and declared before ethernet client, don't know why
 EthernetClient _ethernetClient;   //must be a global
@@ -64,16 +65,16 @@ void loop()
   }  
   
   // if scanner off, and we have motion, and more then 10min since last attack, then turn on scanner
-  unsigned long timeNow = millis();
-  if (movement && _scannerOff && (((timeNow-_lastAttackTime)>_disarmTimeSpan) || _kidMode)) {   
+  timeNow = millis();
+  if (movement && _scannerOff && (((timeNow-lastAttackTime) > disarmTimeSpan) || _kidMode)) {   
     generateUUID();
     controlDoor(true);                            //open scanner door 
     controlNozzelServos(true);                    // get pan and tilt nozzel servos going
 	  controlScanner(true);                          // turn on scanner
 
     //keep track of scanner on time, will turn it off if nothing happens for a while
-    _lastTargetTime = millis();       
-    _attackStartTime = millis();              //keep track of when the attack begain    
+    lastTargetTime = millis();       
+    attackStartTime = millis();              //keep track of when the attack begain    
     getScanData(_base);                       //get one scan and save it to array    
     postDataToAgol(_base);                    // save scan to agol
   }
@@ -81,12 +82,12 @@ void loop()
   if (!_scannerOff) {
     // continue scanning if less than 2 minutes since last target
     //   stop scanning if attack has gone on more than 5 minutes (if not in kid mode)
-    unsigned long timeNow = millis();
-    if ((((timeNow-_lastTargetTime) < 120000UL) && !_disableGun && (((timeNow-_attackStartTime) < 300000UL) || _kidMode))) {
+    timeNow = millis();
+    if ((((timeNow-lastTargetTime) < 120000UL) && !_disableGun && (((timeNow-attackStartTime) < 300000UL) || _kidMode))) {
         getScanData(false);                    //get a scan
         processScanData();                     //look for targets   
         if (_distance > 0) {
-          _lastTargetTime = millis();          
+          lastTargetTime = millis();          
           moveServosAndShootTarget();  
           postDataToAgol(_targets);            // if shot at something then post the fact
           //postDataToAgol(_currentScan);          // for troubleshooting also post the current scan
@@ -96,8 +97,8 @@ void loop()
       controlScanner(false);                  // turn off the scanner
       controlDoor(false);                     // and close the door
       controlNozzelServos(false);           
-      _lastAttackTime = millis();              //reset last attack time 
-      _disarmTimeSpan = 600000UL;             //set disarm time period to 10 min                                               
+      lastAttackTime = millis();              //reset last attack time 
+      disarmTimeSpan = 600000UL;             //set disarm time period to 10 min                                               
       movement=getXbandRate(true);            //reset the running average used to trigger a detection      
     }
   }      
