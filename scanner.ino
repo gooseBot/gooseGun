@@ -66,12 +66,13 @@ void getScanData (boolean getBaseScan) {
 }
 
 void controlDoor(boolean doorOpen) {
-  static boolean _doorInitalized = false;
-  _doorServo.attach(_bucketDoorPin,950,2025);  
+  byte bucketDoorPin = 6;
+  static boolean doorInitalized = false;
+  _doorServo.attach(bucketDoorPin,950,2025);  
   if (doorOpen) {
     _doorServo.write(175);
   } else {    
-	if (!_doorInitalized){
+	if (!doorInitalized){
 	    // this code moves door servo to 90 degrees initially seems to be needed.  Otherwise open/close
 	    //    code doesnt seem to work.  This servo is a waterproof servo and was modified by 
         //    servo city to work at 180 degrees, maybe this is part of the reason?		_doorInitalized = true;
@@ -85,8 +86,9 @@ void controlDoor(boolean doorOpen) {
 }
 
 void controlScanner(boolean scannerOn) {
+  byte scannerMosfetPin = 8;
 	if (scannerOn) {
-		digitalWrite(_scannerMosfetPin, HIGH);    // turn on power
+		digitalWrite(scannerMosfetPin, HIGH);    // turn on power
     delay(9000);                              // wait for scanner to go green
     // I Used PLS/LSI software to set permanent baud.  See Help topic in software on how to do this via SICK Diagnosis
     //   If decide to use temporary method must be in setup mode first (sends password which is SICK_PLS)  
@@ -96,8 +98,8 @@ void controlScanner(boolean scannerOn) {
     Serial.end();
     _scannerOff = false;
   } else {
-    pinMode(_scannerMosfetPin, OUTPUT);
-    digitalWrite(_scannerMosfetPin, LOW);
+    pinMode(scannerMosfetPin, OUTPUT);
+    digitalWrite(scannerMosfetPin, LOW);
     _scannerOff = true;
   }
 }

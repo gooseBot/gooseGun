@@ -13,14 +13,11 @@
 
 // items that might go into EEPROM config
 boolean _dataOff=false;
-// kid mode disables most time outs.  the 5 minute attack timeout and the 10 min rest are disabled
-boolean _kidMode=false;                
+boolean _kidMode=false;                     // kid mode disables most time outs.    
 boolean _disableGun=false;
 
 // all other globals
 char _packetBuffer[UDP_TX_PACKET_MAX_SIZE];      //buffer to hold incoming packet,    
-long _uuidNumber=0;                   // a unique number to help track attack sessions and their data
-
 const int _numScanReturns = 360;
 byte _baseScan[_numScanReturns];
 byte _scan[_numScanReturns];
@@ -29,11 +26,7 @@ float _angle=0;
 byte _distance=0;
 long _totDifferences=0;
 float _arcLength=0;
-byte _scannerMosfetPin = 8;                 
-
-byte _bucketDoorPin = 6;
-byte _bottomServoPin = 9;
-byte _topServoPin = 5;  
+                 
 Servo _bottomServo;
 Servo _topServo;
 Servo _doorServo;
@@ -51,15 +44,21 @@ unsigned long _lastAttackTime = 0;
 unsigned long _disarmTimeSpan = 0;
 unsigned long _attackStartTime = 0;
 
-EthernetUDP _Udp;
 EthernetClient _ethernetClient;
+EthernetUDP _Udp;
 
 void setup()                    // run once, when the sketch starts
 {
-  initializeUPD();         //setup UDP
+  byte _mac[] = { 0x90, 0xA2, 0xDA, 0x0E, 0x70, 0x30 };
+  IPAddress _ip(192, 168, 1, 178);            // ip address from my router not using dhcp
+  Ethernet.begin(_mac, _ip);
+  delay(1000);
+  _Udp.begin(8888);
+
+  //initializeUPD();         //setup UDP
   controlDoor(false);      //ensure door is closed (in case of power outage on prior run)
   controlScanner(false);   //ensure scanner is also off
-  initializeTargeting();
+  closeValve();
 }
 
 void loop()                          
@@ -73,7 +72,7 @@ void loop()
   // if scanner off, and we have motion, and more then 10min since last attack, then turn on scanner
   unsigned long timeNow = millis();
   if (movement && _scannerOff && (((timeNow-_lastAttackTime)>_disarmTimeSpan) || _kidMode)) {   
-    _uuidNumber = TrueRandom.random();            // setup a random (for this date at least) ID for this session.      
+    generateUUID();
     controlDoor(true);                            //open scanner door 
     controlNozzelServos(true);                    // get pan and tilt nozzel servos going
 	  controlScanner(true);                          // turn on scanner

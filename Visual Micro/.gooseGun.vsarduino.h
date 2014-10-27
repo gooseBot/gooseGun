@@ -41,6 +41,7 @@ extern "C" void __cxa_pure_virtual() {;}
 
 //
 //
+void generateUUID();
 void postDataToAgol(byte scanType);
 int sendAgolData(int scanType);
 int sendScanData(int scanType);
@@ -58,7 +59,7 @@ void getScanData (boolean getBaseScan);
 void controlDoor(boolean doorOpen);
 void controlScanner(boolean scannerOn);
 void controlNozzelServos(boolean turnOn);
-void initializeTargeting();
+void closeValve();
 void processScanData();
 void moveServosAndShootTarget();
 

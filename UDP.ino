@@ -1,10 +1,5 @@
 
 void initializeUPD() {
-  byte _mac[] = { 0x90, 0xA2, 0xDA, 0x0E, 0x70, 0x30 };
-  IPAddress _ip(192, 168, 1, 178);            // ip address from my router not using dhcp
-  Ethernet.begin(_mac, _ip);
-  delay(1000);
-  _Udp.begin(8888);
 }
 
 void sendUDP(byte *response, int responseSize) {

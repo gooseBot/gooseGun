@@ -3,7 +3,11 @@
 float _scannerX = 1002185;         //scanner x location in wa state plane south in yard
 float _scannerY = 692538;          //scanner y location in wa state plane south in yard
 float _scannerAngle2statePlane = 22.0 * 71 / 4068;   // scanner angle to statePlane in yard
+static long _uuidNumber = 0;                   // a unique number to help track attack sessions and their data
 
+void generateUUID(){
+  _uuidNumber = TrueRandom.random();            // setup a random (for this date at least) ID for this session.
+}
 
 void postDataToAgol(byte scanType) {
   int contentLength=0;

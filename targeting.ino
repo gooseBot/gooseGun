@@ -6,9 +6,11 @@ float _gravity = 32.0;               //feet/sec/sec
 byte _valveMosfetPin = 4;
 
 void controlNozzelServos(boolean turnOn) {
+  byte bottomServoPin = 9;
+  byte topServoPin = 5;
   if (turnOn) {
-    _bottomServo.attach(_bottomServoPin, 544, 2400);
-    _topServo.attach(_topServoPin, 1050, 2400);
+    _bottomServo.attach(bottomServoPin, 544, 2400);
+    _topServo.attach(topServoPin, 1050, 2400);
     _topServo.write(_tiltServoNeutralAngle);       // put tilt servo at "level" position 
     myDelay(100);                                  // give tilt servo time to move
   }
@@ -21,7 +23,7 @@ void controlNozzelServos(boolean turnOn) {
   }
 }
 
-void initializeTargeting(){
+void closeValve(){
   // maxrange is used elsewhere need it now.
   _maxRange = sqrt(((pow(_nozzelVelocity, 4) / _gravity) - 2 * _nozzelAboveGroundDistance*pow(_nozzelVelocity, 2)) / _gravity);
   pinMode(_valveMosfetPin, OUTPUT);
