@@ -44,18 +44,12 @@ unsigned long _lastAttackTime = 0;
 unsigned long _disarmTimeSpan = 0;
 unsigned long _attackStartTime = 0;
 
-EthernetClient _ethernetClient;
 EthernetUDP _Udp;
+EthernetClient _ethernetClient;
 
 void setup()                    // run once, when the sketch starts
 {
-  byte _mac[] = { 0x90, 0xA2, 0xDA, 0x0E, 0x70, 0x30 };
-  IPAddress _ip(192, 168, 1, 178);            // ip address from my router not using dhcp
-  Ethernet.begin(_mac, _ip);
-  delay(1000);
-  _Udp.begin(8888);
-
-  //initializeUPD();         //setup UDP
+  initializeUPD();         //setup UDP
   controlDoor(false);      //ensure door is closed (in case of power outage on prior run)
   controlScanner(false);   //ensure scanner is also off
   closeValve();

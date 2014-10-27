@@ -65,11 +65,11 @@ void moveServosAndShootTarget();
 
 #include "C:\Program Files (x86)\Arduino\hardware\arduino\cores\arduino\arduino.h"
 #include "C:\Program Files (x86)\Arduino\hardware\arduino\variants\standard\pins_arduino.h" 
-#include "C:\Users\Eric\Documents\Arduino\gooseGun\gooseGun.ino"
-#include "C:\Users\Eric\Documents\Arduino\gooseGun\Agol.ino"
-#include "C:\Users\Eric\Documents\Arduino\gooseGun\UDP.ino"
-#include "C:\Users\Eric\Documents\Arduino\gooseGun\Utility.ino"
-#include "C:\Users\Eric\Documents\Arduino\gooseGun\motionDetect.ino"
-#include "C:\Users\Eric\Documents\Arduino\gooseGun\scanner.ino"
-#include "C:\Users\Eric\Documents\Arduino\gooseGun\targeting.ino"
+#include "C:\Users\Eric\Documents\Arduino\gooseGun\gooseGun\gooseGun.ino"
+#include "C:\Users\Eric\Documents\Arduino\gooseGun\gooseGun\Agol.ino"
+#include "C:\Users\Eric\Documents\Arduino\gooseGun\gooseGun\UDP.ino"
+#include "C:\Users\Eric\Documents\Arduino\gooseGun\gooseGun\Utility.ino"
+#include "C:\Users\Eric\Documents\Arduino\gooseGun\gooseGun\motionDetect.ino"
+#include "C:\Users\Eric\Documents\Arduino\gooseGun\gooseGun\scanner.ino"
+#include "C:\Users\Eric\Documents\Arduino\gooseGun\gooseGun\targeting.ino"
 #endif
