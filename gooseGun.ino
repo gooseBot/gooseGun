@@ -39,6 +39,10 @@ volatile int _pulsesPerSec=0;
 float _stdDeviationPulseRate=0;
 float _pulsesPerSecAvg=2;             //start off with something or will get an instant detection.
 boolean _scannerOff = true;
+unsigned long _lastTargetTime = 0;
+unsigned long _lastAttackTime = 0;
+unsigned long _disarmTimeSpan = 0;
+unsigned long _attackStartTime = 0;
 
 EthernetUDP _Udp;                 //must be a global and declared before ethernet client, don't know why
 EthernetClient _ethernetClient;   //must be a global
@@ -53,11 +57,6 @@ void setup()                    // run once, when the sketch starts
 
 void loop()                          
 {  
-  unsigned long _lastTargetTime = 0;
-  unsigned long _lastAttackTime = 0;
-  unsigned long _disarmTimeSpan = 0;
-  unsigned long _attackStartTime = 0;
-
   //get motion rate if scanner not already on
   boolean movement=true;                
   if (_scannerOff) {
