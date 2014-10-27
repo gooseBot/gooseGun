@@ -114,10 +114,9 @@ int sendScanData(int scanType) {
   dataLength+=_ethernetClient.print(F(",\"sessionUUID\":"));  
   dataLength+=_ethernetClient.print(_uuidNumber);   
   dataLength+=_ethernetClient.print(F(",\"messages\":"));  
-  //save a histogram of motion sensor readings for debuging
   dataLength+=_ethernetClient.print(F("'")); 
   //get the histogram from motionDetect 
-  Histogram _hist = getHist();
+  Histogram _hist = getHistogram();
   dataLength+=_ethernetClient.print(_hist.bucket(0));
   dataLength+=_ethernetClient.print(F("-"));  
   dataLength+=_ethernetClient.print(_hist.frequency(0));  

@@ -6,8 +6,8 @@ void getScanData (boolean getBaseScan) {
   int j=0;   //count to make sure measures header is read consecutively
   int k=0;   //count for storing measures as bytes in feet
   int offset=0;
-  int myByte=0;
-  byte byte1=0;
+  int thisByte=0;
+  byte priorByte=0;
   byte distFeet=0;
   boolean readMeasureBytes=false;  
   byte measuresHeader[] = {0x2,0x80,0xD6,0x2,0xB0,0x69,0x1};
@@ -20,14 +20,14 @@ void getScanData (boolean getBaseScan) {
   
   while (!done) { 
     if (Serial.available() > 0) {
-      myByte = Serial.read();   
+      thisByte = Serial.read();   
       j++;                              //increment consecutive byte counter
       
       if (readMeasureBytes) {           //are we reading measures or looking for a header?
         if (i < _bytesPerScan) {         //get all the bytes for a single scan
           if (((i + 1) % 2 == 0)) {
             // added 0.5 to the float prior to truncation to get a rounded value
-            distFeet = (float((byte1 + myByte*256))/30.0)+0.5;
+            distFeet = (float((priorByte + thisByte*256))/30.0)+0.5;
             if (getBaseScan) {
               _baseScan[k] = distFeet;
             } else {
@@ -35,7 +35,7 @@ void getScanData (boolean getBaseScan) {
             }             
             k++;
           } else {
-            byte1 = myByte;
+            priorByte = thisByte;
           }
           i++;                          //increment byte count
         } else {
@@ -44,7 +44,7 @@ void getScanData (boolean getBaseScan) {
         }
       } else {
         //looking for a header
-        if (myByte == measuresHeader[c]){
+        if (thisByte == measuresHeader[c]){
           c++;                          //get ready to test the next rec byte against the next header byte
           if ((c > 6) && (j == c))  {   // a header must match all 7 bytes and be consecutive bytes
             //got a full header, remaining 722 bytes are the measures
@@ -87,6 +87,7 @@ void controlDoor(boolean doorOpen) {
 
 void controlScanner(boolean scannerOn) {
   byte scannerMosfetPin = 8;
+  pinMode(scannerMosfetPin, OUTPUT);
 	if (scannerOn) {
 		digitalWrite(scannerMosfetPin, HIGH);    // turn on power
     delay(9000);                              // wait for scanner to go green
@@ -98,7 +99,6 @@ void controlScanner(boolean scannerOn) {
     Serial.end();
     _scannerOff = false;
   } else {
-    pinMode(scannerMosfetPin, OUTPUT);
     digitalWrite(scannerMosfetPin, LOW);
     _scannerOff = true;
   }
