@@ -115,8 +115,6 @@ int sendScanData(int scanType) {
   dataLength+=_ethernetClient.print(_uuidNumber);   
   dataLength+=_ethernetClient.print(F(",\"messages\":"));  
   dataLength+=_ethernetClient.print(F("'")); 
-  //get the histogram from motionDetect 
-  Histogram _hist = getHistogram();
   dataLength+=_ethernetClient.print(_hist.bucket(0));
   dataLength+=_ethernetClient.print(F("-"));  
   dataLength+=_ethernetClient.print(_hist.frequency(0));  
@@ -169,7 +167,12 @@ int sendTargetData() {
 int sendMessage() {
   int dataLength=0; 
   dataLength+=_ethernetClient.print(F("features=[{\"attributes\":{\"messages\":\""));
-  dataLength+=_ethernetClient.print(_packetBuffer);     
+  dataLength += _ethernetClient.print(F("UDPbuf="));
+  dataLength+=_ethernetClient.print(_packetBuffer);    
+  dataLength+=_ethernetClient.print(F(" PulseRate="));
+  dataLength+=_ethernetClient.print(_pulsesPerSec);
+  dataLength+=_ethernetClient.print(F(" PulseAvg="));
+  dataLength+=_ethernetClient.print(_pulsesPerSecAvg);
   dataLength+=_ethernetClient.print(F("\"}}]"));
   return dataLength;  
 }

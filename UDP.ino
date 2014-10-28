@@ -20,7 +20,7 @@ void listenForUDP () {
 
   if(packetSize)
   {  
-    memset(_packetBuffer,0,sizeof(_packetBuffer));       //clear the buffer
+    memset(_packetBuffer,0,sizeof(_packetBuffer));        //clear the buffer
     _Udp.read(_packetBuffer,UDP_TX_PACKET_MAX_SIZE);      // read the packet into packetBufffer
     postDataToAgol(_messages);
     //loop the commands looking for a match to the packet

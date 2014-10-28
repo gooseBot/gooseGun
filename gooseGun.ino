@@ -39,19 +39,20 @@ volatile int _pulsesPerSec=0;
 float _stdDeviationPulseRate=0;
 float _pulsesPerSecAvg=2;             //start off with something or will get an instant detection.
 boolean _scannerOff = true;
-unsigned long lastTargetTime = 0;
-unsigned long lastAttackTime = 0;
-unsigned long disarmTimeSpan = 0;
-unsigned long attackStartTime = 0;
-unsigned long timeNow = 0;
+unsigned long _lastTargetTime = 0;
+unsigned long _lastAttackTime = 0;
+unsigned long _disarmTimeSpan = 0;
+unsigned long _attackStartTime = 0;
+unsigned long _timeNow = 0;
 
 EthernetUDP _Udp;                 //must be a global and declared before ethernet client, don't know why
 EthernetClient _ethernetClient;   //must be a global
+double _xBandBuckets[] = { 0, 1, 2, 3, 5, 10, 20, 1000 };
+Histogram _hist(8, _xBandBuckets); //motion sensor data
 
 void setup()                    // run once, when the sketch starts
 {
   initializeUPD();         //setup UDP
-  controlDoor(false);      //ensure door is closed (in case of power outage on prior run)
   controlScanner(false);   //ensure scanner is also off
   closeValve();
 }
@@ -65,16 +66,14 @@ void loop()
   }  
   
   // if scanner off, and we have motion, and more then 10min since last attack, then turn on scanner
-  timeNow = millis();
-  if (movement && _scannerOff && (((timeNow-lastAttackTime) > disarmTimeSpan) || _kidMode)) {   
-    generateUUID();
-    controlDoor(true);                            //open scanner door 
-    controlNozzelServos(true);                    // get pan and tilt nozzel servos going
+  _timeNow = millis();
+  if (movement && _scannerOff && (((_timeNow-_lastAttackTime) > _disarmTimeSpan) || _kidMode)) {   
+    generateUUID(); 
 	  controlScanner(true);                          // turn on scanner
 
     //keep track of scanner on time, will turn it off if nothing happens for a while
-    lastTargetTime = millis();       
-    attackStartTime = millis();              //keep track of when the attack begain    
+    _lastTargetTime = millis();       
+    _attackStartTime = millis();              //keep track of when the attack begain    
     getScanData(_base);                       //get one scan and save it to array    
     postDataToAgol(_base);                    // save scan to agol
   }
@@ -82,23 +81,21 @@ void loop()
   if (!_scannerOff) {
     // continue scanning if less than 2 minutes since last target
     //   stop scanning if attack has gone on more than 5 minutes (if not in kid mode)
-    timeNow = millis();
-    if ((((timeNow-lastTargetTime) < 120000UL) && !_disableGun && (((timeNow-attackStartTime) < 300000UL) || _kidMode))) {
+    _timeNow = millis();
+    if ((((_timeNow-_lastTargetTime) < 120000UL) && !_disableGun && (((_timeNow-_attackStartTime) < 300000UL) || _kidMode))) {
         getScanData(false);                    //get a scan
         processScanData();                     //look for targets   
         if (_distance > 0) {
-          lastTargetTime = millis();          
+          _lastTargetTime = millis();          
           moveServosAndShootTarget();  
           postDataToAgol(_targets);            // if shot at something then post the fact
           //postDataToAgol(_currentScan);          // for troubleshooting also post the current scan
         }    
     } else {
       //nothing has happend for 2 minutes or we have attacked more than 5 minutes
-      controlScanner(false);                  // turn off the scanner
-      controlDoor(false);                     // and close the door
-      controlNozzelServos(false);           
-      lastAttackTime = millis();              //reset last attack time 
-      disarmTimeSpan = 600000UL;             //set disarm time period to 10 min                                               
+      controlScanner(false);                  // turn off the scanner         
+      _lastAttackTime = millis();              //reset last attack time 
+      _disarmTimeSpan = 600000UL;             //set disarm time period to 10 min                                               
       movement=getXbandRate(true);            //reset the running average used to trigger a detection      
     }
   }      

@@ -52,7 +52,6 @@ void initializeUPD();
 void sendUDP(char *response, int responseSize);
 void listenForUDP ();
 void myDelay(int mseconds);
-Histogram getHistogram();
 boolean getXbandRate(boolean resetRollingAvgNumbers);
 void onPulse();
 void getScanData (boolean getBaseScan);

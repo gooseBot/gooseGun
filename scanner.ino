@@ -89,6 +89,8 @@ void controlScanner(boolean scannerOn) {
   byte scannerMosfetPin = 8;
   pinMode(scannerMosfetPin, OUTPUT);
 	if (scannerOn) {
+    controlDoor(true);                       //open door
+    controlNozzelServos(true);               //enable servos and position nozzel
 		digitalWrite(scannerMosfetPin, HIGH);    // turn on power
     delay(9000);                              // wait for scanner to go green
     // I Used PLS/LSI software to set permanent baud.  See Help topic in software on how to do this via SICK Diagnosis
@@ -101,6 +103,8 @@ void controlScanner(boolean scannerOn) {
   } else {
     digitalWrite(scannerMosfetPin, LOW);
     _scannerOff = true;
+    controlDoor(false);
+    controlNozzelServos(false);
   }
 }
 

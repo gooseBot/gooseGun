@@ -83,8 +83,8 @@ void processScanData() {
       avgi = sumi / consecutivei;
       avgMeasure = float(sumMeasures/consecutivei) + 0.5;  //add .5 then truncate, this rounds the value
       // don't waste time on targets that are out of range or are moving away, or too close to scanner
-	  //   water drips from the saucer and can cause false targets during ran
-	  if (avgMeasure <= _maxRange && sumDifferences > 0 && avgMeasure >= minDistanceToScanner) {
+	    //   water drips from the saucer and can cause false targets during ran
+	    if (avgMeasure <= _maxRange && sumDifferences > 0 && avgMeasure >= minDistanceToScanner) {
         if ((maxConsecutivei == 0) || (consecutivei > maxConsecutivei)) {          
           // a larger valid target (or the first one) has been found, compute needed information
           maxConsecutivei = consecutivei;
