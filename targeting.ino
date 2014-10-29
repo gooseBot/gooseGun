@@ -12,15 +12,12 @@ void controlNozzelServos(boolean turnOn) {
     _bottomServo.attach(bottomServoPin, 544, 2400);
     _topServo.attach(topServoPin, 1050, 2400);
     _topServo.write(_tiltServoNeutralAngle);       // put tilt servo at "level" position 
-    myDelay(100);                                  // give tilt servo time to move
   }
   else {
     _topServo.detach();
     _bottomServo.detach();
-    //wait for servos to finish relaxing before starting up, otherwise motion gets
-    //  caught by the sensor and rolling average is not accurate.
-    delay(1000);
   }
+  delay(1000);       //wait for nozzels to stop moving or motion is caught
 }
 
 void closeValve(){

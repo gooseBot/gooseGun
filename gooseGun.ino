@@ -92,11 +92,11 @@ void loop()
           //postDataToAgol(_currentScan);          // for troubleshooting also post the current scan
         }    
     } else {
-      //nothing has happend for 2 minutes or we have attacked more than 5 minutes
-      controlScanner(false);                  // turn off the scanner         
+      //nothing has happend for 2 minutes or we have attacked more than 5 minutes   
       _lastAttackTime = millis();              //reset last attack time 
       _disarmTimeSpan = 600000UL;             //set disarm time period to 10 min                                               
-      movement=getXbandRate(true);            //reset the running average used to trigger a detection      
+      movement=getXbandRate(true);            //reset the running average used to trigger a detection   
+      controlScanner(false);                  // turn off the scanner 
     }
   }      
   listenForUDP();                        //is an Android connected?

@@ -72,14 +72,15 @@ void controlDoor(boolean doorOpen) {
   if (doorOpen) {
     _doorServo.write(175);
   } else {    
-	if (!doorInitalized){
+	  if (!doorInitalized){
 	    // this code moves door servo to 90 degrees initially seems to be needed.  Otherwise open/close
 	    //    code doesnt seem to work.  This servo is a waterproof servo and was modified by 
-        //    servo city to work at 180 degrees, maybe this is part of the reason?		_doorInitalized = true;
-	  _doorServo.write(90);
-	  myDelay(500);
-	} 
-	_doorServo.write(10);
+        //    servo city to work at 180 degrees, maybe this is part of the reason?		
+      doorInitalized = true;
+	    _doorServo.write(90);
+	    myDelay(500);
+	  } 
+	  _doorServo.write(10);
   }  
   myDelay(1000);           //this delay is needed or door won't close all the way
   _doorServo.detach();

@@ -37,14 +37,14 @@ boolean getXbandRate(boolean resetRollingAvgNumbers)
   _hist.add(_pulsesPerSec);                  // add current rate to the histogram, including zeros
   // update the rolling average but dont include the zeros, skews the result too much.
   if (_pulsesPerSec>=1) {                     
-    total= total - _scan[index];               // subtract the last reading:
+    total= total - _scan[index];             // subtract the last reading:
     _scan[index] = _pulsesPerSec;   
-    total= total + _scan[index];               // add the reading to the total:
-    index = (index + 1) % (_numScanReturns/3);     // advance to the next position in the array:  
-    if (readingCount < (_numScanReturns/3)) readingCount++;    // increment readingcount, if needed
-    _stdDeviationPulseRate = stddev(_scan,readingCount);          //calc the deviation
-    _pulsesPerSecAvg = (float)total/readingCount;              // calculate the rolling average:   
-    _pulsesPerSecAvg = _pulsesPerSecAvg*1.5;           //increase value by 20%
+    total= total + _scan[index];                              // add the reading to the total:
+    index = (index + 1) % (_numScanReturns/3);                // advance to the next position in the array:  
+    if (readingCount < (_numScanReturns/3)) readingCount++;   // increment readingcount, if needed
+    _stdDeviationPulseRate = stddev(_scan,readingCount);      //calc the deviation
+    _pulsesPerSecAvg = (float)total/readingCount;             // calculate the rolling average:   
+    _pulsesPerSecAvg = _pulsesPerSecAvg*1.5;                  //increase value by 20%
   } else {
     zero++;                                    //keep track of the zeros
   }
@@ -69,9 +69,6 @@ boolean getXbandRate(boolean resetRollingAvgNumbers)
           _pulsesPerSecAvg = 18;                              
           if (_hist.frequency(5)>=0.010) {                      // if the histogram "5-10" greater than 1% then its raining really hard
             _pulsesPerSecAvg = 21;     
-			if (_hist.frequency(6) >= 0.010) {                      // if the histogram "10-20" greater than 1% then its raining really hard
-				_pulsesPerSecAvg = 30;
-			}
           }
         }
       }
