@@ -59,21 +59,13 @@ boolean getXbandRate(boolean resetRollingAvgNumbers)
   } 
   
   // look at the frequency of pulse rates to see if it's raining and increase the avg to compensate
-  if (_hist.frequency(1)>=0.010) {                           // if the histogram "ones" geater than 1% then its raining.
-    _pulsesPerSecAvg = 5;                                      
-    if (_hist.frequency(2)>=0.010) {                         // if the histogram "twos" greater than 1% then its raining hard
-      _pulsesPerSecAvg = 10;                                  
-      if (_hist.frequency(3)>=0.010) {                        // if the histogram "threes" greater than 1% then its raining very hard
-        _pulsesPerSecAvg = 15;                                
-        if (_hist.frequency(4)>=0.010) {                      // if the histogram "4 and 5s" greater than 1% then its raining really hard
-          _pulsesPerSecAvg = 18;                              
-          if (_hist.frequency(5)>=0.010) {                      // if the histogram "5-10" greater than 1% then its raining really hard
-            _pulsesPerSecAvg = 21;     
-          }
-        }
-      }
+  //  the more buckets with 1% or higher of the total distribution then the higher the threshold to prevent rain triggering
+  byte rateSteps[] = { 5, 10, 15, 18, 21 };
+  for (byte i = 1; i < 6; i++){
+    if (_hist.frequency(i) >= 0.010){
+      _pulsesPerSecAvg = rateSteps[i-1];
     }
-  } 
+  }
   return false;
 }
 
