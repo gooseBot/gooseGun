@@ -40,6 +40,7 @@ void processScanData() {
   int sumDifferences = 0;
   int lasti = 0;
   int avgi = 0;
+  float arcLength = 0.0;
   byte minDistanceToScanner = 3;
   byte avgMeasure = 0;  
   boolean readingAgroup = false;
@@ -78,17 +79,19 @@ void processScanData() {
     // if we were processing a group (target) and it has ended, then process it
     if (consecutivei > 0 && !readingAgroup) {
       avgi = sumi / consecutivei;
-      avgMeasure = float(sumMeasures/consecutivei) + 0.5;  //add .5 then truncate, this rounds the value
+      avgMeasure = float(sumMeasures/consecutivei) + 0.5;         //add .5 then truncate, this rounds the value
+      arcLength = avgMeasure*(((consecutivei*0.5) * 71) / 4068);  //width of return
       // don't waste time on targets that are out of range or are moving away, or too close to scanner
-	    //   water drips from the saucer and can cause false targets during ran
-	    if (avgMeasure <= _maxRange && sumDifferences > 0 && avgMeasure >= minDistanceToScanner) {
+	    //   water drips from the saucer and can cause false targets during rain
+      //   ignore small width returns, probably will be rain drops
+      if (avgMeasure <= _maxRange && sumDifferences > 0 && avgMeasure >= minDistanceToScanner && arcLength > .05) {
         if ((maxConsecutivei == 0) || (consecutivei > maxConsecutivei)) {          
           // a larger valid target (or the first one) has been found, compute needed information
+          _arcLength = arcLength;
           maxConsecutivei = consecutivei;
-          _angle = avgi*0.5;
           _distance = avgMeasure;
-          _totDifferences = sumDifferences; 
-          _arcLength = _distance*(((maxConsecutivei*0.5)*71)/4068);          
+          _angle = avgi*0.5;
+          _totDifferences = sumDifferences;  
         }
       } else {
         //this is probably an object that was in basescan, then moved after that time
