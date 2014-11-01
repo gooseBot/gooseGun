@@ -165,6 +165,10 @@ int sendTargetData() {
 }
 
 int sendMessage() {
+  //"geometry" : {
+  //  "x" : -122.41247978999991,
+  //    "y" : 37.770630098000083
+  //}
   int dataLength=0; 
   dataLength+=_ethernetClient.print(F("features=[{\"attributes\":{\"messages\":\""));
   dataLength += _ethernetClient.print(F("UDPbuf="));

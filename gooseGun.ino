@@ -61,18 +61,16 @@ void loop()
 {  
   //get motion rate if scanner not already on
   boolean movement=true;                
-  if (_scannerOff) {
+  if (_scannerOff) { 
     movement=getXbandRate(false);  
   }  
-  
   // if scanner off, and we have motion, and more then 10min since last attack, then turn on scanner
   _timeNow = millis();
   if (movement && _scannerOff && (((_timeNow-_lastAttackTime) > _disarmTimeSpan) || _kidMode)) {   
     generateUUID(); 
-	  controlScanner(true);                          // turn on scanner
-
+	  controlScanner(true);                     // turn on scanner
     //keep track of scanner on time, will turn it off if nothing happens for a while
-    _lastTargetTime = millis();       
+    _lastTargetTime = millis();               //keep track of the last shot time
     _attackStartTime = millis();              //keep track of when the attack begain    
     getScanData(_base);                       //get one scan and save it to array    
     postDataToAgol(_base);                    // save scan to agol
@@ -81,25 +79,29 @@ void loop()
   if (!_scannerOff) {
     // continue scanning if less than 2 minutes since last target
     //   stop scanning if attack has gone on more than 5 minutes (if not in kid mode)
+    //   stop scanning if gun disabled
     _timeNow = millis();
-    if ((((_timeNow-_lastTargetTime) < 120000UL) && !_disableGun && (((_timeNow-_attackStartTime) < 300000UL) || _kidMode))) {
-        getScanData(false);                    //get a scan
-        processScanData();                     //look for targets   
-        if (_distance > 0) {
-          _lastTargetTime = millis();          
-          moveServosAndShootTarget();  
-          postDataToAgol(_targets);            // if shot at something then post the fact
-          //postDataToAgol(_currentScan);          // for troubleshooting also post the current scan
-        }    
+    if (((_timeNow-_lastTargetTime) < 120000UL) && !_disableGun && (((_timeNow-_attackStartTime) < 300000UL) || _kidMode)) {
+      getScanData(false);                    //get a scan
+      processScanData();                     //look for targets   
+      if (_distance > 0) {
+        _lastTargetTime = millis();          
+        moveServosAndShootTarget();  
+        postDataToAgol(_targets);            // if shot at something then post the fact
+        //postDataToAgol(_currentScan);      // for troubleshooting also post the current scan
+      }    
     } else {
-      //nothing has happend for 2 minutes or we have attacked more than 5 minutes   
-      _lastAttackTime = millis();              //reset last attack time 
-      _disarmTimeSpan = 600000UL;             //set disarm time period to 10 min                                               
-      movement=getXbandRate(true);            //reset the running average used to trigger a detection   
-      controlScanner(false);                  // turn off the scanner 
+      //nothing has happend for 2 minutes or we have attacked more than 5 minutes or gun was disabled
+      controlScanner(false);                 // turn off the scanner 
+      movement = getXbandRate(true);         //reset the running average used to trigger a detection 
+      if (_disableGun){
+        _disarmTimeSpan = 0UL;  //set disarm time period to 0 min if gun was manually disabled, avoids disarm when renabled             
+      } else {
+        _disarmTimeSpan = 600000UL;         //set disarm time period to 10 min if not manually disabled  
+      }
     }
   }      
-  listenForUDP();                        //is an Android connected?
+  listenForUDP();                           //is an Android connected?
 }
 
 

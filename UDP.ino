@@ -29,12 +29,19 @@ void listenForUDP () {
       {
         switch (i) 
         {
-          case 0:_dataOff = true; break;
-          case 1:_dataOff = false; break;
-          case 2:_kidMode = true; break;
-          case 3:_kidMode = false; break;
-          case 4:_disableGun = true; break;
-          case 5:_disableGun = false; break;
+          case 0: 
+            _dataOff = false; break;
+          case 1: 
+            _dataOff = true; break;
+          case 2: 
+            _kidMode = true; break;
+          case 3: 
+            _kidMode = false; break;
+          case 4: 
+            _disableGun = false; 
+            break;
+          case 5: 
+            _disableGun = true; break;
           default: break; 
         }
         sendUDP(commands[i], 3);
