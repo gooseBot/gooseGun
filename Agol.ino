@@ -16,7 +16,7 @@ void postDataToAgol(byte scanType) {
     
   if (_ethernetClient.connect("www.example.com",80)) {
     //first get the content length.  The operations will fail but will calculate the length without having
-    //  to build an array and consume what little memory is left!  Using google as the host 
+    //  to build an array and consume what little memory is left!  Using example as the host 
     //  as I think arcgis.com locks out failed attempts
     contentLength = sendAgolData(scanType);
   }
@@ -82,8 +82,9 @@ int sendScanData(int scanType) {
   int dataLength=0;  
   float pointX=0.0;
   float pointY=0.0;  
+  //String txData = "";
   dataLength=_ethernetClient.print(F("features=[{\"geometry\":{\"paths\":[["));
-  for (int i=0; i < (_numScanReturns); i++) {
+  for (int i=0; i < _numScanReturns; i++) {
     //convert polar coords to state plane relative to scanner
     if (scanType==_base) {
       getStatePlaneCoords(_baseScan[i], (i*0.5), pointX, pointY);    
@@ -95,10 +96,14 @@ int sendScanData(int scanType) {
     dataLength+=_ethernetClient.print(F(","));
     dataLength+=_ethernetClient.print(pointY);
     dataLength+=_ethernetClient.print(F("]"));
-    if (i<((_numScanReturns)-1)) {
+    //txData = "[" + (String(pointX)) + "," + (String(pointY)) + "]";
+    if (i<(_numScanReturns-1)) {
       dataLength+=_ethernetClient.print(F(","));    
+      //txData = txData + ",";
     }
+    //dataLength += _ethernetClient.print(txData);
   }
+
   dataLength+=_ethernetClient.print(F("]],"));
   dataLength+=_ethernetClient.print(F("\"spatialReference\":{\"wkid\":2286}},"));
   dataLength+=_ethernetClient.print(F("\"attributes\":{\"scanType\":"));
@@ -176,7 +181,9 @@ int sendMessage() {
   dataLength+=_ethernetClient.print(F(" PulseRate="));
   dataLength+=_ethernetClient.print(_pulsesPerSec);
   dataLength+=_ethernetClient.print(F(" PulseAvg="));
-  dataLength+=_ethernetClient.print(_pulsesPerSecAvg);
+  dataLength += _ethernetClient.print(_pulsesPerSecAvg);
+  dataLength += _ethernetClient.print(F(" DisarmTimeSpan="));
+  dataLength += _ethernetClient.print(_disarmTimeSpan); 
   dataLength+=_ethernetClient.print(F("\"}}]"));
   return dataLength;  
 }

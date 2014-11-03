@@ -1,9 +1,9 @@
 
 void initializeUPD() {
-  byte _mac[] = { 0x90, 0xA2, 0xDA, 0x0E, 0x70, 0x30 };
-  IPAddress _ip(192, 168, 1, 178);            // ip address from my router not using dhcp
-  Ethernet.begin(_mac, _ip);
-  delay(1000);
+  byte mac[] = { 0x90, 0xA2, 0xDA, 0x0E, 0x70, 0x30 };
+  IPAddress ip(192, 168, 1, 178);            // ip address from my router not using dhcp
+  Ethernet.begin(mac, ip);
+  myDelay(2000);
   _Udp.begin(8888);
 }
 
@@ -38,8 +38,7 @@ void listenForUDP () {
           case 3: 
             _kidMode = false; break;
           case 4: 
-            _disableGun = false; 
-            break;
+            _disableGun = false; break;
           case 5: 
             _disableGun = true; break;
           default: break; 

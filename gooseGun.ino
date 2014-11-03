@@ -66,7 +66,7 @@ void loop()
   }  
   // if scanner off, and we have motion, and more then 10min since last attack, then turn on scanner
   _timeNow = millis();
-  if (movement && _scannerOff && (((_timeNow-_lastAttackTime) > _disarmTimeSpan) || _kidMode)) {   
+  if ((movement && _scannerOff && (((_timeNow-_lastAttackTime) > _disarmTimeSpan) || _kidMode))) {   
     generateUUID(); 
 	  controlScanner(true);                     // turn on scanner
     //keep track of scanner on time, will turn it off if nothing happens for a while
@@ -99,6 +99,8 @@ void loop()
       } else {
         _disarmTimeSpan = 600000UL;         //set disarm time period to 10 min if not manually disabled  
       }
+      _lastAttackTime = millis();              //reset last attack time 
+      postDataToAgol(_messages);
     }
   }      
   listenForUDP();                           //is an Android connected?
