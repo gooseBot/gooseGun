@@ -4,14 +4,16 @@ float _scannerX = 1002185;         //scanner x location in wa state plane south 
 float _scannerY = 692538;          //scanner y location in wa state plane south in yard
 float _scannerAngle2statePlane = 22.0 * 71 / 4068;   // scanner angle to statePlane in yard
 static long _uuidNumber = 0;                   // a unique number to help track attack sessions and their data
-
+const char* _postStr1 = "POST /25Iz4FI030a91YVh/arcgis/rest/services/";
+const char* _postStr2 = "/FeatureServer/0/addFeatures HTTP/1.1";
 void generateUUID(){
   _uuidNumber = TrueRandom.random();            // setup a random (for this date at least) ID for this session.
 }
 
 void postDataToAgol(byte scanType) {
   int contentLength=0;
-  
+  //IPAddress ip(192, 168, 0, 254);
+
   if (_dataOff && scanType!=_messages) return;
     
   if (_ethernetClient.connect("www.example.com",80)) {
@@ -29,20 +31,16 @@ void postDataToAgol(byte scanType) {
     // determine which post to use based on feature service we are posting to
     switch (scanType) {
       case _base:
-        _ethernetClient.println(F("POST /25Iz4FI030a91YVh/arcgis/rest/services/Base_Scans_4/FeatureServer/0/addFeatures HTTP/1.1"));         
-        break;
+        //_ethernetClient.println(F("POST /25Iz4FI030a91YVh/arcgis/rest/services/Base_Scans_4/FeatureServer/0/addFeatures HTTP/1.1"));         
+        sendPostHeader("Base_Scans_4"); break;
       case _currentScan:
-        _ethernetClient.println(F("POST /25Iz4FI030a91YVh/ArcGIS/rest/services/currentScans/FeatureServer/0/addFeatures HTTP/1.1"));         
-        break;
+        sendPostHeader("currentScans"); break;
       case _targets:
-        _ethernetClient.println(F("POST /25Iz4FI030a91YVh/ArcGIS/rest/services/Targets/FeatureServer/0/addFeatures HTTP/1.1"));
-        break;
+        sendPostHeader("Targets"); break;
       case _ignoredTargets:
-        _ethernetClient.println(F("POST /25Iz4FI030a91YVh/ArcGIS/rest/services/Ignored_Targets/FeatureServer/0/addFeatures HTTP/1.1"));
-        break;
+        sendPostHeader("Ignored_Targets"); break;
       case _messages:
-        _ethernetClient.println(F("POST /25Iz4FI030a91YVh/ArcGIS/rest/services/messages/FeatureServer/0/addFeatures HTTP/1.1"));
-        break;
+        sendPostHeader("messages"); break;
     }    
     _ethernetClient.println(F("Host: services2.arcgis.com"));
     _ethernetClient.println(F("Content-Type: application/x-www-form-urlencoded"));
@@ -56,6 +54,12 @@ void postDataToAgol(byte scanType) {
   if (_ethernetClient.connected()) {
     _ethernetClient.stop();
   }
+}
+
+void sendPostHeader(char * serviceName) {
+  _ethernetClient.print(_postStr1);
+  _ethernetClient.print(serviceName);
+  _ethernetClient.println(_postStr2);
 }
 
 int sendAgolData(int scanType) {
@@ -82,7 +86,7 @@ int sendScanData(int scanType) {
   int dataLength=0;  
   float pointX=0.0;
   float pointY=0.0;  
-  //String txData = "";
+  String txData = "";
   dataLength=_ethernetClient.print(F("features=[{\"geometry\":{\"paths\":[["));
   for (int i=0; i < _numScanReturns; i++) {
     //convert polar coords to state plane relative to scanner
@@ -91,17 +95,17 @@ int sendScanData(int scanType) {
     } else {
       getStatePlaneCoords(_scan[i], (i*0.5), pointX, pointY);
     }
-    dataLength+=_ethernetClient.print(F("["));
-    dataLength+=_ethernetClient.print(pointX); 
-    dataLength+=_ethernetClient.print(F(","));
-    dataLength+=_ethernetClient.print(pointY);
-    dataLength+=_ethernetClient.print(F("]"));
-    //txData = "[" + (String(pointX)) + "," + (String(pointY)) + "]";
+    //dataLength+=_ethernetClient.print(F("["));
+    //dataLength+=_ethernetClient.print(pointX); 
+    //dataLength+=_ethernetClient.print(F(","));
+    //dataLength+=_ethernetClient.print(pointY);
+    //dataLength+=_ethernetClient.print(F("]"));
+    txData = "[" + (String(pointX)) + "," + (String(pointY)) + "]";
     if (i<(_numScanReturns-1)) {
-      dataLength+=_ethernetClient.print(F(","));    
-      //txData = txData + ",";
+      //dataLength+=_ethernetClient.print(F(","));    
+      txData = txData + ",";
     }
-    //dataLength += _ethernetClient.print(txData);
+    dataLength += _ethernetClient.print(txData);
   }
 
   dataLength+=_ethernetClient.print(F("]],"));
@@ -118,20 +122,24 @@ int sendScanData(int scanType) {
   dataLength+=_ethernetClient.print(_maxRange);   
   dataLength+=_ethernetClient.print(F(",\"sessionUUID\":"));  
   dataLength+=_ethernetClient.print(_uuidNumber);   
-  dataLength+=_ethernetClient.print(F(",\"messages\":"));  
-  dataLength+=_ethernetClient.print(F("'")); 
-  dataLength+=_ethernetClient.print(_hist.bucket(0));
+  dataLength+=_ethernetClient.print(F(",\"messages\":'"));  
+/*  dataLength+=_ethernetClient.print(_hist.bucket(0));
   dataLength+=_ethernetClient.print(F("-"));  
-  dataLength+=_ethernetClient.print(_hist.frequency(0));  
+  dataLength+=_ethernetClient.print(_hist.frequency(0)); */ 
+  txData = "";
+  txData = txData + _hist.bucket(0) + "-" + _hist.frequency(0);
   for (int j = 1; j < _hist.size(); j++)
   {
-    dataLength+=_ethernetClient.print(F(","));  
+/*    dataLength+=_ethernetClient.print(F(","));  
     dataLength+=_ethernetClient.print(_hist.bucket(j));
     dataLength+=_ethernetClient.print(F("-"));    
-    dataLength+=_ethernetClient.print(_hist.frequency(j));  
+    dataLength+=_ethernetClient.print(_hist.frequency(j));*/  
+    //txData = txData + "," + (String(_hist.bucket(j))) + "-" + (String(_hist.frequency(j)));
+    txData = txData + "," + _hist.bucket(j) + "-" + _hist.frequency(j);
+    //if (j < (_hist.size() - 1)) { txData = txData + ","; }
   }
-  dataLength+=_ethernetClient.print(F("'"));  
-  dataLength+=_ethernetClient.print(F("}}]"));
+  dataLength+=_ethernetClient.print(txData);
+  dataLength+=_ethernetClient.print(F("'}}]"));
   return dataLength;
 }
 

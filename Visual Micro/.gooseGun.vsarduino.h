@@ -43,6 +43,7 @@ extern "C" void __cxa_pure_virtual() {;}
 //
 void generateUUID();
 void postDataToAgol(byte scanType);
+void sendPostHeader(char * serviceName);
 int sendAgolData(int scanType);
 int sendScanData(int scanType);
 int sendTargetData();

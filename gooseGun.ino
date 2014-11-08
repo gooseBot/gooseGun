@@ -62,7 +62,7 @@ void loop()
   //get motion rate if scanner not already on
   boolean movement=true;                
   if (_scannerOff) { 
-    movement=getXbandRate(false);  
+    movement=getXbandRate(false);    //comment this line to test without going out and creating motion.
   }  
   // if scanner off, and we have motion, and more then 10min since last attack, then turn on scanner
   _timeNow = millis();
