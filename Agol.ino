@@ -1,37 +1,36 @@
 //float _scannerX = 1002152;         //scanner x location in wa state plane south inside house
 //float _scannerY = 692505;          //scanner y location in wa state plane south inside house
-float _scannerX = 1002185;         //scanner x location in wa state plane south in yard
-float _scannerY = 692538;          //scanner y location in wa state plane south in yard
-float _scannerAngle2statePlane = 22.0 * 71 / 4068;   // scanner angle to statePlane in yard
+const double _scannerX = 1002185;         //scanner x location in wa state plane south in yard
+const double _scannerY = 692538;          //scanner y location in wa state plane south in yard
+const double _scannerAngle2statePlane = 22.0 * 71 / 4068;   // scanner angle to statePlane in yard
 static long _uuidNumber = 0;                   // a unique number to help track attack sessions and their data
 const char* _postStr1 = "POST /25Iz4FI030a91YVh/arcgis/rest/services/";
 const char* _postStr2 = "/FeatureServer/0/addFeatures HTTP/1.1";
+
 void generateUUID(){
   _uuidNumber = TrueRandom.random();            // setup a random (for this date at least) ID for this session.
 }
 
 void postDataToAgol(byte scanType) {
   int contentLength=0;
-  //IPAddress ip(192, 168, 0, 254);
 
   if (_dataOff && scanType!=_messages) return;
     
-  if (_ethernetClient.connect("www.example.com",80)) {
+  if (_ethernetClient.connect("www.example.com", 80)) {
     //first get the content length.  The operations will fail but will calculate the length without having
     //  to build an array and consume what little memory is left!  Using example as the host 
     //  as I think arcgis.com locks out failed attempts
     contentLength = sendAgolData(scanType);
-  }
-  // close down the google connection now that sending is done  
-  if (_ethernetClient.connected()) {
-    _ethernetClient.stop();
-  }
-  // now that we have the length send it for real to arcgis.com
-  if (_ethernetClient.connect("services2.arcgis.com",80)) {
-    // determine which post to use based on feature service we are posting to
-    switch (scanType) {
+
+    // close down the google connection now that sending is done  
+    if (_ethernetClient.connected()) {
+      _ethernetClient.stop();
+    }
+    // now that we have the length send it for real to arcgis.com
+    if (_ethernetClient.connect("services2.arcgis.com", 80)) {
+      // determine which post to use based on feature service we are posting to
+      switch (scanType) {
       case _base:
-        //_ethernetClient.println(F("POST /25Iz4FI030a91YVh/arcgis/rest/services/Base_Scans_4/FeatureServer/0/addFeatures HTTP/1.1"));         
         sendPostHeader("Base_Scans_4"); break;
       case _currentScan:
         sendPostHeader("currentScans"); break;
@@ -41,18 +40,21 @@ void postDataToAgol(byte scanType) {
         sendPostHeader("Ignored_Targets"); break;
       case _messages:
         sendPostHeader("messages"); break;
-    }    
-    _ethernetClient.println(F("Host: services2.arcgis.com"));
-    _ethernetClient.println(F("Content-Type: application/x-www-form-urlencoded"));
-    _ethernetClient.println(F("Connection: close"));
-    _ethernetClient.print(F("Content-Length: "));    
-    _ethernetClient.println(contentLength);
-    _ethernetClient.println();  
-    sendAgolData(scanType);                     //send the data based on type
-    _ethernetClient.println();          
-  }
-  if (_ethernetClient.connected()) {
-    _ethernetClient.stop();
+      }
+      _ethernetClient.println(F("Host: services2.arcgis.com"));
+      _ethernetClient.println(F("Content-Type: application/x-www-form-urlencoded"));
+      _ethernetClient.println(F("Connection: close"));
+      _ethernetClient.print(F("Content-Length: "));
+      _ethernetClient.println(contentLength);
+      _ethernetClient.println();
+      sendAgolData(scanType);                     //send the data based on type
+      _ethernetClient.println();
+    }
+    if (_ethernetClient.connected()) {
+      _ethernetClient.stop();
+    }
+  } else {
+    //initializeUPD();  // if connect fails try reintializing things.
   }
 }
 
@@ -86,7 +88,9 @@ int sendScanData(int scanType) {
   int dataLength=0;  
   float pointX=0.0;
   float pointY=0.0;  
-  String txData = "";
+  char buf[10] = "";
+  char buffer[22] = "";
+  
   dataLength=_ethernetClient.print(F("features=[{\"geometry\":{\"paths\":[["));
   for (int i=0; i < _numScanReturns; i++) {
     //convert polar coords to state plane relative to scanner
@@ -95,19 +99,19 @@ int sendScanData(int scanType) {
     } else {
       getStatePlaneCoords(_scan[i], (i*0.5), pointX, pointY);
     }
-    //dataLength+=_ethernetClient.print(F("["));
-    //dataLength+=_ethernetClient.print(pointX); 
-    //dataLength+=_ethernetClient.print(F(","));
-    //dataLength+=_ethernetClient.print(pointY);
-    //dataLength+=_ethernetClient.print(F("]"));
-    txData = "[" + (String(pointX)) + "," + (String(pointY)) + "]";
-    if (i<(_numScanReturns-1)) {
-      //dataLength+=_ethernetClient.print(F(","));    
-      txData = txData + ",";
-    }
-    dataLength += _ethernetClient.print(txData);
+    //print to ethernet the x,y pairs as whole strings.  cant print them piece by piece or get errors when running over 3g or 4g
+    //  not sure why, wired is fine.  I'm using dtostrf etc trying to avoid String class which adds to memory needs and
+    //  is supposedly less stable.
+    dtostrf(pointX, 8, 1, buf);  // number, width, decimal places, buffer
+    strcpy(buffer, "[");
+    strcat(buffer, buf);
+    strcat(buffer, ",");
+    dtostrf(pointY, 8, 1, buf);  // number, width, decimal places, buffer
+    strcat(buffer, buf);
+    strcat(buffer, "]");
+    if (i < (_numScanReturns - 1)) { strcat(buffer, ","); }
+    dataLength += _ethernetClient.print(buffer);    
   }
-
   dataLength+=_ethernetClient.print(F("]],"));
   dataLength+=_ethernetClient.print(F("\"spatialReference\":{\"wkid\":2286}},"));
   dataLength+=_ethernetClient.print(F("\"attributes\":{\"scanType\":"));
@@ -122,23 +126,14 @@ int sendScanData(int scanType) {
   dataLength+=_ethernetClient.print(_maxRange);   
   dataLength+=_ethernetClient.print(F(",\"sessionUUID\":"));  
   dataLength+=_ethernetClient.print(_uuidNumber);   
-  dataLength+=_ethernetClient.print(F(",\"messages\":'"));  
-/*  dataLength+=_ethernetClient.print(_hist.bucket(0));
-  dataLength+=_ethernetClient.print(F("-"));  
-  dataLength+=_ethernetClient.print(_hist.frequency(0)); */ 
-  txData = "";
-  txData = txData + _hist.bucket(0) + "-" + _hist.frequency(0);
-  for (int j = 1; j < _hist.size(); j++)
+  dataLength += _ethernetClient.print(F(",\"messages\":'"));
+  for (int j = 0; j < _hist.size(); j++)
   {
-/*    dataLength+=_ethernetClient.print(F(","));  
-    dataLength+=_ethernetClient.print(_hist.bucket(j));
-    dataLength+=_ethernetClient.print(F("-"));    
-    dataLength+=_ethernetClient.print(_hist.frequency(j));*/  
-    //txData = txData + "," + (String(_hist.bucket(j))) + "-" + (String(_hist.frequency(j)));
-    txData = txData + "," + _hist.bucket(j) + "-" + _hist.frequency(j);
-    //if (j < (_hist.size() - 1)) { txData = txData + ","; }
+    dataLength += _ethernetClient.print(_hist.bucket(j));
+    dataLength += _ethernetClient.print(F("-"));
+    dataLength += _ethernetClient.print(_hist.frequency(j));
+    if (j < _hist.size() - 1) { dataLength += _ethernetClient.print(F(",")); };
   }
-  dataLength+=_ethernetClient.print(txData);
   dataLength+=_ethernetClient.print(F("'}}]"));
   return dataLength;
 }
@@ -192,6 +187,8 @@ int sendMessage() {
   dataLength += _ethernetClient.print(_pulsesPerSecAvg);
   dataLength += _ethernetClient.print(F(" DisarmTimeSpan="));
   dataLength += _ethernetClient.print(_disarmTimeSpan); 
+  //dataLength += _ethernetClient.print(F(" testPoint="));
+  //dataLength += _ethernetClient.print(_buffer);
   dataLength+=_ethernetClient.print(F("\"}}]"));
   return dataLength;  
 }

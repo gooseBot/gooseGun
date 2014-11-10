@@ -1,13 +1,13 @@
-float _nozzelVelocity = 30.0;        //feet/sec - Seems accurate for yard
-//float _nozzelVelocity = 20.0;        //feet/sec - indoor testing
-float _nozzelAboveGroundDistance = -3;
-byte _tiltServoNeutralAngle = 110;
-float _gravity = 32.0;               //feet/sec/sec
-byte _valveMosfetPin = 4;
+const float _nozzelVelocity = 30.0;        //feet/sec - Seems accurate for yard
+//const float _nozzelVelocity = 20.0;        //feet/sec - indoor testing
+const float _nozzelAboveGroundDistance = -3;
+const byte _tiltServoNeutralAngle = 110;
+const float _gravity = 32.0;               //feet/sec/sec
+const byte _valveMosfetPin = 4;
 
 void controlNozzelServos(boolean turnOn) {
-  byte bottomServoPin = 9;
-  byte topServoPin = 5;
+  const byte bottomServoPin = 9;
+  const byte topServoPin = 5;
   if (turnOn) {
     _bottomServo.attach(bottomServoPin, 544, 2400);
     _topServo.attach(topServoPin, 1050, 2400);
@@ -41,7 +41,7 @@ void processScanData() {
   int lasti = 0;
   int avgi = 0;
   float arcLength = 0.0;
-  byte minDistanceToScanner = 3;
+  const byte minDistanceToScanner = 3;
   byte avgMeasure = 0;  
   boolean readingAgroup = false;
 
@@ -110,7 +110,7 @@ void processScanData() {
 
 void moveServosAndShootTarget()
 { 
-  byte wiggleAmount = 7;
+  const byte wiggleAmount = 7;
   //calc the theoretical tilt angle to point the nozzel at the ground where the target sits
   //  found this formula on wikipedia, remeber that y is negative
   //  use the minus root for the flatest trajectory

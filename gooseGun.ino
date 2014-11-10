@@ -50,11 +50,12 @@ EthernetClient _ethernetClient;   //must be a global
 double _xBandBuckets[] = { 0, 1, 2, 3, 5, 10, 20, 1000 };
 Histogram _hist(8, _xBandBuckets); //motion sensor data
 
-void setup()                    // run once, when the sketch starts
+void setup()               
 {
-  initializeUPD();         //setup UDP
+  initializeUPD();        
   controlScanner(false);   //ensure scanner is also off
   closeValve();
+  delay(5000);
 }
 
 void loop()                          
