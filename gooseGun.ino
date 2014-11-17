@@ -52,6 +52,8 @@ Histogram _hist(8, _xBandBuckets); //motion sensor data
 
 void setup()               
 {
+  pinMode(4, OUTPUT);      //ensure sd card is off or an ethernet issue may occur
+  digitalWrite(4, HIGH);   // SD Card not active
   initializeUPD();        
   controlScanner(false);   //ensure scanner is also off
   closeValve();

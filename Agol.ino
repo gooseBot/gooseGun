@@ -90,7 +90,13 @@ int sendScanData(int scanType) {
   float pointY=0.0;  
   char buf[10] = "";
   char buffer[22] = "";
-  
+
+  //if (scanType == _base) {
+  //  char scanBuffer[0] = (char *)_scan;
+  //} else {
+  //  char scanBuffer = (char *)_baseScan;
+  //}
+
   dataLength=_ethernetClient.print(F("features=[{\"geometry\":{\"paths\":[["));
   for (int i=0; i < _numScanReturns; i++) {
     //convert polar coords to state plane relative to scanner
@@ -112,9 +118,7 @@ int sendScanData(int scanType) {
     if (i < (_numScanReturns - 1)) { strcat(buffer, ","); }
     dataLength += _ethernetClient.print(buffer);    
   }
-  dataLength+=_ethernetClient.print(F("]],"));
-  dataLength+=_ethernetClient.print(F("\"spatialReference\":{\"wkid\":2286}},"));
-  dataLength+=_ethernetClient.print(F("\"attributes\":{\"scanType\":"));
+  dataLength+=_ethernetClient.print(F("]],\"spatialReference\":{\"wkid\":2286}},\"attributes\":{\"scanType\":"));
   dataLength+=_ethernetClient.print(scanType);   
   dataLength+=_ethernetClient.print(F(",\"motionPulseRate\":"));  
   dataLength+=_ethernetClient.print(_pulsesPerSec);   
@@ -156,9 +160,7 @@ int sendTargetData() {
   dataLength+=_ethernetClient.print(pointY);
   dataLength+=_ethernetClient.print(F("]]],"));
   //print the other stuff
-  dataLength+=_ethernetClient.print(F("\"spatialReference\":{\"wkid\":2286}},"));
-  //add the attributes
-  dataLength+=_ethernetClient.print(F("\"attributes\":{\"angle\":"));
+  dataLength+=_ethernetClient.print(F("\"spatialReference\":{\"wkid\":2286}},\"attributes\":{\"angle\":"));
   dataLength+=_ethernetClient.print(_angle);   
   dataLength+=_ethernetClient.print(F(",\"distance\":"));
   dataLength+=_ethernetClient.print(_distance);   
@@ -178,8 +180,7 @@ int sendMessage() {
   //    "y" : 37.770630098000083
   //}
   int dataLength=0; 
-  dataLength+=_ethernetClient.print(F("features=[{\"attributes\":{\"messages\":\""));
-  dataLength += _ethernetClient.print(F("UDPbuf="));
+  dataLength+=_ethernetClient.print(F("features=[{\"attributes\":{\"messages\":\"UDPbuf="));
   dataLength+=_ethernetClient.print(_packetBuffer);    
   dataLength+=_ethernetClient.print(F(" PulseRate="));
   dataLength+=_ethernetClient.print(_pulsesPerSec);
