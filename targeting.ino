@@ -4,7 +4,7 @@ const float _nozzelAboveGroundDistance = -3;
 const byte _tiltServoNeutralAngle = 110;
 const float _gravity = 32.0;               //feet/sec/sec
 const byte _valveMosfetPin = 7;
-const byte _laserPin = 2;
+//const byte _laserPin = 2;
 
 void controlNozzelServos(boolean turnOn) {
   const byte bottomServoPin = 9;
@@ -26,8 +26,8 @@ void closeValve(){
   _maxRange = sqrt(((pow(_nozzelVelocity, 4) / _gravity) - 2 * _nozzelAboveGroundDistance*pow(_nozzelVelocity, 2)) / _gravity);
   pinMode(_valveMosfetPin, OUTPUT);
   digitalWrite(_valveMosfetPin, LOW);
-  pinMode(_laserPin, OUTPUT);
-  digitalWrite(_laserPin, LOW);
+  //pinMode(_laserPin, OUTPUT);
+  //digitalWrite(_laserPin, LOW);
 }
 
 void processScanData() {
@@ -149,7 +149,7 @@ void moveServosAndShootTarget()
   // will open the valve for about 1 second.  Takes a while for the water to get going.
   // will also wiggle the two servos in a pattern left right up down a few times
   digitalWrite(_valveMosfetPin, HIGH);
-  digitalWrite(_laserPin, HIGH);
+  //digitalWrite(_laserPin, HIGH);
   for (int repeat=0; repeat<1; repeat+=1)
   {
     for(int wiggle=0; wiggle<(2*wiggleAmount); wiggle+=1)  
@@ -166,6 +166,6 @@ void moveServosAndShootTarget()
     } 
   }
   digitalWrite(_valveMosfetPin, LOW);
-  digitalWrite(_laserPin, LOW);
+  //digitalWrite(_laserPin, LOW);
 } 
 

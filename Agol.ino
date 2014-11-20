@@ -1,5 +1,5 @@
-//float _scannerX = 1002152;         //scanner x location in wa state plane south inside house
-//float _scannerY = 692505;          //scanner y location in wa state plane south inside house
+//const double _scannerX = 1002152;         //scanner x location in wa state plane south inside house
+//const double _scannerY = 692505;          //scanner y location in wa state plane south inside house
 const double _scannerX = 1002185;         //scanner x location in wa state plane south in yard
 const double _scannerY = 692538;          //scanner y location in wa state plane south in yard
 const double _scannerAngle2statePlane = 22.0 * 71 / 4068;   // scanner angle to statePlane in yard
