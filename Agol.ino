@@ -24,6 +24,7 @@ void postDataToAgol(byte scanType) {
 
     // close down the google connection now that sending is done  
     if (_ethernetClient.connected()) {
+      delay(500); //on 3g it can take a while for the w5100 chip to finish transmission give it some time before closing
       _ethernetClient.stop();
     }
     // now that we have the length send it for real to arcgis.com
@@ -53,8 +54,6 @@ void postDataToAgol(byte scanType) {
     if (_ethernetClient.connected()) {
       _ethernetClient.stop();
     }
-  } else {
-    //initializeUPD();  // if connect fails try reintializing things.
   }
 }
 
@@ -90,12 +89,6 @@ int sendScanData(int scanType) {
   float pointY=0.0;  
   char buf[10] = "";
   char buffer[22] = "";
-
-  //if (scanType == _base) {
-  //  char scanBuffer[0] = (char *)_scan;
-  //} else {
-  //  char scanBuffer = (char *)_baseScan;
-  //}
 
   dataLength=_ethernetClient.print(F("features=[{\"geometry\":{\"paths\":[["));
   for (int i=0; i < _numScanReturns; i++) {

@@ -91,7 +91,6 @@ void loop()
         _lastTargetTime = millis();          
         moveServosAndShootTarget();  
         postDataToAgol(_targets);            // if shot at something then post the fact
-        //postDataToAgol(_currentScan);      // for troubleshooting also post the current scan
       }    
     } else {
       //nothing has happend for 2 minutes or we have attacked more than 5 minutes or gun was disabled

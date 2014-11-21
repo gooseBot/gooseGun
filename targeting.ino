@@ -95,11 +95,7 @@ void processScanData() {
           _distance = avgMeasure;
           _angle = avgi*0.5;
           _totDifferences = sumDifferences;  
-        }
-      } else {
-        //this is probably an object that was in basescan, then moved after that time
-        //  so its now a hole, not a target, so ignore it, or it was out of range of the nozzle
-        //postDataToAgol(_ignoredTargets);                       
+        }                    
       }
       // reset for next target found in this scan
       consecutivei = 0;

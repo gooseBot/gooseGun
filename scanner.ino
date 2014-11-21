@@ -70,7 +70,7 @@ void controlDoor(boolean doorOpen) {
   static boolean doorInitalized = false;
   _doorServo.attach(bucketDoorPin,950,2025);  
   if (doorOpen) {
-    _doorServo.write(175);
+    _doorServo.write(179);
   } else {    
 	  if (!doorInitalized){
 	    // this code moves door servo to 90 degrees initially seems to be needed.  Otherwise open/close
@@ -82,7 +82,7 @@ void controlDoor(boolean doorOpen) {
 	  } 
 	  _doorServo.write(10);
   }  
-  myDelay(1000);           //this delay is needed or door won't close all the way
+  myDelay(1500);           //this delay is needed or door won't close/open all the way
   _doorServo.detach();
 }
 
