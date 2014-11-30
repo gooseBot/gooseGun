@@ -7,20 +7,36 @@ static long _uuidNumber = 0;                   // a unique number to help track 
 const char* _postStr1 = "POST /25Iz4FI030a91YVh/arcgis/rest/services/";
 const char* _postStr2 = "/FeatureServer/0/addFeatures HTTP/1.1";
 
+const byte _base = 1;
+const byte _currentScan = 2;
+const byte _targets = 3;
+const byte _ignoredTargets = 4;
+const byte _messages = 5;
+
 void generateUUID(){
   _uuidNumber = TrueRandom.random();            // setup a random (for this date at least) ID for this session.
 }
 
+void postBaseScanToAgol() {
+  postDataToAgol(_base);
+}
+
+void postTargetToAgol() {
+  postDataToAgol(_targets);
+}
+
+void postMessageToAgol() {
+  postDataToAgol(_messages);
+}
+
 void postDataToAgol(byte scanType) {
   int contentLength=0;
-
-  if (_dataOff && scanType!=_messages) return;
     
   if (_ethernetClient.connect("www.example.com", 80)) {
     //first get the content length.  The operations will fail but will calculate the length without having
     //  to build an array and consume what little memory is left!  Using example as the host 
     //  as I think arcgis.com locks out failed attempts
-    contentLength = sendAgolData(scanType);
+    contentLength = sendData(scanType);
 
     // close down the google connection now that sending is done  
     if (_ethernetClient.connected()) {
@@ -32,15 +48,15 @@ void postDataToAgol(byte scanType) {
       // determine which post to use based on feature service we are posting to
       switch (scanType) {
       case _base:
-        sendPostHeader("Base_Scans_4"); break;
+        sendPostURLheader("Base_Scans_4"); break;
       case _currentScan:
-        sendPostHeader("currentScans"); break;
+        sendPostURLheader("currentScans"); break;
       case _targets:
-        sendPostHeader("Targets"); break;
+        sendPostURLheader("Targets"); break;
       case _ignoredTargets:
-        sendPostHeader("Ignored_Targets"); break;
+        sendPostURLheader("Ignored_Targets"); break;
       case _messages:
-        sendPostHeader("messages"); break;
+        sendPostURLheader("messages"); break;
       }
       _ethernetClient.println(F("Host: services2.arcgis.com"));
       _ethernetClient.println(F("Content-Type: application/x-www-form-urlencoded"));
@@ -48,7 +64,7 @@ void postDataToAgol(byte scanType) {
       _ethernetClient.print(F("Content-Length: "));
       _ethernetClient.println(contentLength);
       _ethernetClient.println();
-      sendAgolData(scanType);                     //send the data based on type
+      sendData(scanType);                     //send the data based on type
       _ethernetClient.println();
     }
     if (_ethernetClient.connected()) {
@@ -57,13 +73,13 @@ void postDataToAgol(byte scanType) {
   }
 }
 
-void sendPostHeader(char * serviceName) {
+void sendPostURLheader(char * serviceName) {
   _ethernetClient.print(_postStr1);
   _ethernetClient.print(serviceName);
   _ethernetClient.println(_postStr2);
 }
 
-int sendAgolData(int scanType) {
+int sendData(int scanType) {
   int dataLength=0;
   switch (scanType) {
     case _base:
@@ -91,12 +107,12 @@ int sendScanData(int scanType) {
   char buffer[22] = "";
 
   dataLength=_ethernetClient.print(F("features=[{\"geometry\":{\"paths\":[["));
-  for (int i=0; i < _numScanReturns; i++) {
+  for (int i = 0; i < getNumScanReturns(); i++) {
     //convert polar coords to state plane relative to scanner
     if (scanType==_base) {
-      getStatePlaneCoords(_baseScan[i], (i*0.5), pointX, pointY);    
+      getStatePlaneCoords(getBaseScanByte(i), (i*0.5), pointX, pointY);
     } else {
-      getStatePlaneCoords(_scan[i], (i*0.5), pointX, pointY);
+      getStatePlaneCoords(getScanByte(i), (i*0.5), pointX, pointY);
     }
     //print to ethernet the x,y pairs as whole strings.  cant print them piece by piece or get errors when running over 3g or 4g
     //  not sure why, wired is fine.  I'm using dtostrf etc trying to avoid String class which adds to memory needs and
@@ -108,19 +124,19 @@ int sendScanData(int scanType) {
     dtostrf(pointY, 8, 1, buf);  // number, width, decimal places, buffer
     strcat(buffer, buf);
     strcat(buffer, "]");
-    if (i < (_numScanReturns - 1)) { strcat(buffer, ","); }
+    if (i < (getNumScanReturns() - 1)) { strcat(buffer, ","); }
     dataLength += _ethernetClient.print(buffer);    
   }
   dataLength+=_ethernetClient.print(F("]],\"spatialReference\":{\"wkid\":2286}},\"attributes\":{\"scanType\":"));
   dataLength+=_ethernetClient.print(scanType);   
   dataLength+=_ethernetClient.print(F(",\"motionPulseRate\":"));  
-  dataLength+=_ethernetClient.print(_pulsesPerSec);   
+  dataLength += _ethernetClient.print(getPulsesPerSec());
   dataLength+=_ethernetClient.print(F(",\"thresholdMotionPulseRate\":"));  
-  dataLength+=_ethernetClient.print(_pulsesPerSecAvg);   
-  dataLength+=_ethernetClient.print(F(",\"stdDeviationPulseRate\":"));  
-  dataLength+=_ethernetClient.print(_stdDeviationPulseRate);   
+  dataLength += _ethernetClient.print(getPulsesPerSecAvg());
+  //dataLength+=_ethernetClient.print(F(",\"stdDeviationPulseRate\":"));  
+  //dataLength+=_ethernetClient.print(_stdDeviationPulseRate);   
   dataLength+=_ethernetClient.print(F(",\"maxRange\":"));  
-  dataLength+=_ethernetClient.print(_maxRange);   
+  dataLength += _ethernetClient.print(getMaxRange());
   dataLength+=_ethernetClient.print(F(",\"sessionUUID\":"));  
   dataLength+=_ethernetClient.print(_uuidNumber);   
   dataLength += _ethernetClient.print(F(",\"messages\":'"));
@@ -140,7 +156,7 @@ int sendTargetData() {
   float pointX=0.0;
   float pointY=0.0;  
   //convert polar coords in cartesian coords relative to scanners cartesian system
-  getStatePlaneCoords(_distance, _angle, pointX, pointY);
+  getStatePlaneCoords(getDistance(), getAngle(), pointX, pointY);
   //print the first part
   dataLength=_ethernetClient.print(F("features=[{\"geometry\":{\"paths\":[[["));  
   //print the point
@@ -154,13 +170,13 @@ int sendTargetData() {
   dataLength+=_ethernetClient.print(F("]]],"));
   //print the other stuff
   dataLength+=_ethernetClient.print(F("\"spatialReference\":{\"wkid\":2286}},\"attributes\":{\"angle\":"));
-  dataLength+=_ethernetClient.print(_angle);   
+  dataLength += _ethernetClient.print(getAngle());
   dataLength+=_ethernetClient.print(F(",\"distance\":"));
-  dataLength+=_ethernetClient.print(_distance);   
+  dataLength+=_ethernetClient.print(getDistance());   
   dataLength+=_ethernetClient.print(F(",\"sumOfDifferences\":"));
-  dataLength+=_ethernetClient.print(_totDifferences);   
+  dataLength += _ethernetClient.print(getTotDifferences());
   dataLength+=_ethernetClient.print(F(",\"width\":"));
-  dataLength+=_ethernetClient.print(_arcLength);   
+  dataLength += _ethernetClient.print(getArcLength());
   dataLength+=_ethernetClient.print(F(",\"sessionUUID\":"));  
   dataLength+=_ethernetClient.print(_uuidNumber);     
   dataLength+=_ethernetClient.print(F("}}]"));
@@ -174,13 +190,13 @@ int sendMessage() {
   //}
   int dataLength=0; 
   dataLength+=_ethernetClient.print(F("features=[{\"attributes\":{\"messages\":\"UDPbuf="));
-  dataLength+=_ethernetClient.print(_packetBuffer);    
+  dataLength += _ethernetClient.print(getPacketBuffer());
   dataLength+=_ethernetClient.print(F(" PulseRate="));
-  dataLength+=_ethernetClient.print(_pulsesPerSec);
+  dataLength += _ethernetClient.print(getPulsesPerSec());
   dataLength+=_ethernetClient.print(F(" PulseAvg="));
-  dataLength += _ethernetClient.print(_pulsesPerSecAvg);
-  dataLength += _ethernetClient.print(F(" DisarmTimeSpan="));
-  dataLength += _ethernetClient.print(_disarmTimeSpan); 
+  dataLength += _ethernetClient.print(getPulsesPerSecAvg());
+  //dataLength += _ethernetClient.print(F(" DisarmTimeSpan="));
+  //dataLength += _ethernetClient.print(_disarmTimeSpan); 
   //dataLength += _ethernetClient.print(F(" testPoint="));
   //dataLength += _ethernetClient.print(_buffer);
   dataLength+=_ethernetClient.print(F("\"}}]"));

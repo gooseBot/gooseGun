@@ -1,10 +1,23 @@
-boolean getXbandRate(boolean resetRollingAvgNumbers)
+//static float _stdDeviationPulseRate = 0;
+static float _pulsesPerSecAvg = 2;
+static volatile int _pulsesPerSec = 0;
+
+float getPulsesPerSecAvg(){
+  return _pulsesPerSecAvg;
+}
+
+float getPulsesPerSec(){
+  return _pulsesPerSec;
+}
+
+boolean detectMovement(boolean resetRollingAvgNumbers)
 {
   _pulsesPerSec=0;                       //reset the count
   static int index = 0;                  // the index of the current reading
   static int total = 0;                  // the running total
   static int readingCount = 0;
   static int zero = 0;
+
   
   // reset the numbers used to compute rolling average, needed after an attack is done
   //  Im reusing the scan array to compute the rolling average
@@ -13,13 +26,13 @@ boolean getXbandRate(boolean resetRollingAvgNumbers)
     index=0;
     total=0;
     readingCount=0;
-    for (int i = 0; i < _numScanReturns; i++) {_scan[i] = 0;}
+    clearScanArray();
     _hist.clear();                  //also clear the histogram data
     zero=0;    
     return false;    
   }
   
-  if (_disableGun) {return false;}  
+  //if (_disableGun) {return false;}  
     
   // get num of pulses for one second from the xband
   unsigned long starttime = millis();      //going to count for a fixed time
@@ -37,12 +50,12 @@ boolean getXbandRate(boolean resetRollingAvgNumbers)
   _hist.add(_pulsesPerSec);                  // add current rate to the histogram, including zeros
   // update the rolling average but dont include the zeros, skews the result too much.
   if (_pulsesPerSec>=1) {                     
-    total= total - _scan[index];             // subtract the last reading:
-    _scan[index] = _pulsesPerSec;   
-    total= total + _scan[index];                              // add the reading to the total:
-    index = (index + 1) % (_numScanReturns/3);                // advance to the next position in the array:  
-    if (readingCount < (_numScanReturns/3)) readingCount++;   // increment readingcount, if needed
-    _stdDeviationPulseRate = stddev(_scan,readingCount);      //calc the deviation
+    total = total - getScanByte(index);                      // subtract the last reading:
+    setScanByte(index, _pulsesPerSec);  
+    total = total + getScanByte(index);                      // add the reading to the total:
+    index = (index + 1) % (getNumScanReturns()/ 3);                // advance to the next position in the array:  
+    if (readingCount < (getNumScanReturns()/ 3)) readingCount++;   // increment readingcount, if needed
+    //_stdDeviationPulseRate = stddev(_scan,readingCount);      //calc the deviation
     _pulsesPerSecAvg = (float)total/readingCount;             // calculate the rolling average:   
     _pulsesPerSecAvg = _pulsesPerSecAvg*1.5;                  //increase value by 20%
   } else {
@@ -53,7 +66,7 @@ boolean getXbandRate(boolean resetRollingAvgNumbers)
   //  this will keep the frequency information on a timeframe similar to the rolling average
   if (index==0) {
     _hist.clear();
-    for (int i=0;i<(_numScanReturns/3);i++) {_hist.add(_scan[i]);}   
+    for (int i = 0; i<(getNumScanReturns()/ 3); i++) { _hist.add(getScanByte(i)); }
     for (int i=0;i<(zero);i++) {_hist.add(0);} 
     zero=0;
   } 

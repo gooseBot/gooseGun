@@ -1,3 +1,9 @@
+static Servo _doorServo;              //must be global
+
+void captureBaseScan() {
+  generateUUID();
+  getScanData(_base);
+}
 
 void getScanData (boolean getBaseScan) {
   
@@ -29,9 +35,11 @@ void getScanData (boolean getBaseScan) {
             // added 0.5 to the float prior to truncation to get a rounded value
             distFeet = (float((priorByte + thisByte*256))/30.0)+0.5;
             if (getBaseScan) {
-              _baseScan[k] = distFeet;
+              //_baseScan[k] = distFeet;
+              setBaseScanByte(k, distFeet);
             } else {
-              _scan[k] = distFeet;
+              //_scan[k] = distFeet;
+              setScanByte(k, distFeet);
             }             
             k++;
           } else {
@@ -100,10 +108,8 @@ void controlScanner(boolean scannerOn) {
     Serial.begin(38400, SERIAL_8E1);
     Serial.write(startMeasures, sizeof(startMeasures));  //request all scan data continuously  
     Serial.end();
-    _scannerOff = false;
   } else {
     digitalWrite(scannerMosfetPin, LOW);
-    _scannerOff = true;
     controlDoor(false);
     controlNozzelServos(false);
   }

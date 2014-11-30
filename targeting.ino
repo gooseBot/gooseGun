@@ -4,14 +4,77 @@ const float _nozzelAboveGroundDistance = -3;
 const byte _tiltServoNeutralAngle = 110;
 const float _gravity = 32.0;               //feet/sec/sec
 const byte _valveMosfetPin = 7;
+float _maxRange = 0;
+float _angle = 0;
+byte _distance = 0;
+long _totDifferences = 0;
+float _arcLength = 0;
 //const byte _laserPin = 2;
+
+const int _numScanReturns = 360;
+static byte _baseScan[_numScanReturns];
+static byte _scan[_numScanReturns];
+static Servo _bottomServo;            
+static Servo _topServo;               
+
+void initializeTargeting(){
+  _maxRange = sqrt(((pow(_nozzelVelocity, 4) / _gravity) - 2 * _nozzelAboveGroundDistance*pow(_nozzelVelocity, 2)) / _gravity);
+  pinMode(_valveMosfetPin, OUTPUT);
+  //pinMode(_laserPin, OUTPUT);
+  closeValve();
+}
+
+int getNumScanReturns(){
+  return _numScanReturns;
+}
+
+float getMaxRange(){
+  return _maxRange;
+}
+
+float getAngle(){
+  return _angle;
+}
+
+byte getBaseScanByte(int index){
+  return _baseScan[index];
+}
+
+void setBaseScanByte(int index, byte value){
+  _baseScan[index] = value;
+}
+
+byte getScanByte(int index){
+  return _scan[index];
+}
+
+void setScanByte(int index, byte value){
+  _scan[index] = value;
+}
+
+void clearScanArray(){
+  for (int i = 0; i < _numScanReturns; i++) { _scan[i] = 0; }
+}
+
+byte getDistance(){
+  return _distance;
+}
+
+long getTotDifferences(){
+  return _totDifferences;
+}
+
+float getArcLength(){
+  return _arcLength;
+}
 
 void controlNozzelServos(boolean turnOn) {
   const byte bottomServoPin = 9;
-  const byte topServoPin = 5;
+  const byte topServoPin = 14;  //analog 14
   if (turnOn) {
     _bottomServo.attach(bottomServoPin, 544, 2400);
     _topServo.attach(topServoPin, 1050, 2400);
+    _bottomServo.write(90);                         //straight ahead
     _topServo.write(_tiltServoNeutralAngle);       // put tilt servo at "level" position 
   }
   else {
@@ -22,12 +85,13 @@ void controlNozzelServos(boolean turnOn) {
 }
 
 void closeValve(){
-  // maxrange is used elsewhere need it now.
-  _maxRange = sqrt(((pow(_nozzelVelocity, 4) / _gravity) - 2 * _nozzelAboveGroundDistance*pow(_nozzelVelocity, 2)) / _gravity);
-  pinMode(_valveMosfetPin, OUTPUT);
   digitalWrite(_valveMosfetPin, LOW);
-  //pinMode(_laserPin, OUTPUT);
   //digitalWrite(_laserPin, LOW);
+}
+
+void openValve(){
+  digitalWrite(_valveMosfetPin, HIGH);
+  //digitalWrite(_laserPin, HIGH);
 }
 
 void processScanData() {
@@ -144,8 +208,7 @@ void moveServosAndShootTarget()
   
   // will open the valve for about 1 second.  Takes a while for the water to get going.
   // will also wiggle the two servos in a pattern left right up down a few times
-  digitalWrite(_valveMosfetPin, HIGH);
-  //digitalWrite(_laserPin, HIGH);
+  openValve();
   for (int repeat=0; repeat<1; repeat+=1)
   {
     for(int wiggle=0; wiggle<(2*wiggleAmount); wiggle+=1)  
@@ -161,7 +224,6 @@ void moveServosAndShootTarget()
       myDelay(60);
     } 
   }
-  digitalWrite(_valveMosfetPin, LOW);
-  //digitalWrite(_laserPin, LOW);
+  closeValve();
 } 
 

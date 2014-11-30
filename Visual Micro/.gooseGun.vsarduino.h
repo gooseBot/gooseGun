@@ -41,25 +41,49 @@ extern "C" void __cxa_pure_virtual() {;}
 
 //
 //
+void manageAttack();
 void generateUUID();
+void postBaseScanToAgol();
+void postTargetToAgol();
+void postMessageToAgol();
 void postDataToAgol(byte scanType);
-void sendPostHeader(char * serviceName);
-int sendAgolData(int scanType);
+void sendPostURLheader(char * serviceName);
+int sendData(int scanType);
 int sendScanData(int scanType);
 int sendTargetData();
 int sendMessage();
 void getStatePlaneCoords(int radius, float angleInDeg, float &pointX, float &pointY);
+char * getPacketBuffer();
+boolean getDataOff();
+boolean getKidMode();
+boolean getDisableGun();
 void initializeUPD();
 void sendUDP(char *response, int responseSize);
 void listenForUDP ();
 void myDelay(int mseconds);
-boolean getXbandRate(boolean resetRollingAvgNumbers);
+float getPulsesPerSecAvg();
+float getPulsesPerSec();
+boolean detectMovement(boolean resetRollingAvgNumbers);
 void onPulse();
+void captureBaseScan();
 void getScanData (boolean getBaseScan);
 void controlDoor(boolean doorOpen);
 void controlScanner(boolean scannerOn);
+void initializeTargeting();
+int getNumScanReturns();
+float getMaxRange();
+float getAngle();
+byte getBaseScanByte(int index);
+void setBaseScanByte(int index, byte value);
+byte getScanByte(int index);
+void setScanByte(int index, byte value);
+void clearScanArray();
+byte getDistance();
+long getTotDifferences();
+float getArcLength();
 void controlNozzelServos(boolean turnOn);
 void closeValve();
+void openValve();
 void processScanData();
 void moveServosAndShootTarget();
 
