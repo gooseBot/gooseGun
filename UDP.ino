@@ -40,14 +40,14 @@ void sendUDP(char *response, int responseSize) {
 
 void listenForUDP () {  
   int packetSize = _Udp.parsePacket();       // if there's data available, read a packet
-  char* commands[] = { "don", "dof", "kon", "kof", "gon", "gof" };
+  char* commands[] = { "don", "dof", "kon", "kof", "gon", "gof", "sts" };
 
   if(packetSize)
   {  
     memset(_packetBuffer,0,sizeof(_packetBuffer));        //clear the buffer
     _Udp.read(_packetBuffer,UDP_TX_PACKET_MAX_SIZE);      // read the packet into packetBufffer
     //loop the commands looking for a match to the packet
-    for (int i=0;i<6;i++){
+    for (int i=0;i<7;i++){
       if (strcmp(_packetBuffer, (char*)commands[i]) == 0)
       {
         switch (i) 
@@ -64,9 +64,22 @@ void listenForUDP () {
             _disableGun = false; break;
           case 5: 
             _disableGun = true; break;
-          default: break; 
+          case 6:
+            strcpy(_packetBuffer, "");
+            if (!_dataOff)
+              strcat(_packetBuffer, commands[0]);
+            if (_kidMode) 
+              strcat(_packetBuffer, commands[2]);
+            if (!_disableGun)
+              strcat(_packetBuffer, commands[4]);
+            break;
+          default: break;
         }
-        sendUDP(commands[i], 3);
+        if (i = 6) {
+          sendUDP(_packetBuffer, 9);
+        } else {
+          sendUDP(commands[i], 3);
+        }
         postDataToAgol(_messages);  //record info about the UDP command
       }
     }
