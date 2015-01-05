@@ -42,6 +42,7 @@ extern "C" void __cxa_pure_virtual() {;}
 //
 //
 void manageAttack();
+void manageManualAttack();
 void generateUUID();
 void postBaseScanToAgol();
 void postTargetToAgol();
@@ -57,6 +58,7 @@ char * getPacketBuffer();
 boolean getDataOff();
 boolean getKidMode();
 boolean getDisableGun();
+boolean getManualMode();
 void initializeUPD();
 void sendUDP(char *response, int responseSize);
 void listenForUDP ();

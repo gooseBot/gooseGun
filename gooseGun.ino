@@ -20,7 +20,10 @@ void setup()
 }
 
 void loop()                          
-{ 
+{
+  if (getManualMode()) {
+    manageManualAttack();
+  }
   if (detectMovement(false) && !getDisableGun()) {
     manageAttack();
   }
@@ -66,4 +69,9 @@ void manageAttack() {
   }
 }
 
-
+void manageManualAttack() {
+    do
+    {
+      listenForUDP();                           //is an Android connected?
+    } while (getManualMode());
+}

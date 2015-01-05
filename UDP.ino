@@ -1,8 +1,8 @@
 static char _packetBuffer[UDP_TX_PACKET_MAX_SIZE];      //buffer to hold incoming packet, 
-// items that might go into EEPROM config
 static boolean _dataOff = false;
 static boolean _kidMode = false;                     // kid mode disables most time outs.    
 static boolean _disableGun = false;
+static boolean _manualMode = false;                
 
 char * getPacketBuffer(){
   return _packetBuffer;
@@ -20,6 +20,10 @@ boolean getDisableGun(){
   return _disableGun;
 }
 
+boolean getManualMode(){
+  return _manualMode;
+}
+
 void initializeUPD() {
   pinMode(4, OUTPUT);      //ensure sd card is off or an ethernet issue may occur
   digitalWrite(4, HIGH);   // SD Card not active
@@ -33,38 +37,37 @@ void initializeUPD() {
 void sendUDP(char *response, int responseSize) {
   _Udp.beginPacket(_Udp.remoteIP(), _Udp.remotePort());
   _Udp.write(response, responseSize);  
-  //myDelay(200);
   _Udp.endPacket(); 
-  //myDelay(200);
 }
 
 void listenForUDP () {  
   int packetSize = _Udp.parsePacket();       // if there's data available, read a packet
-  char* commands[] = { "don", "dof", "kon", "kof", "gon", "gof", "sts" };
+  char* commands[] = { "don", "dof", "kon", "kof", "gon", "gof", "sts", "mon", "mof", "von", "vof" };
 
   if(packetSize)
   {  
     memset(_packetBuffer,0,sizeof(_packetBuffer));        //clear the buffer
     _Udp.read(_packetBuffer,UDP_TX_PACKET_MAX_SIZE);      // read the packet into packetBufffer
     //loop the commands looking for a match to the packet
-    for (int i=0;i<7;i++){
+    for (int i=0;i<11;i++){
       if (strcmp(_packetBuffer, (char*)commands[i]) == 0)
       {
         switch (i) 
         {
-          case 0: 
+          case 0:    //don
             _dataOff = false; break;
-          case 1: 
+          case 1:    //dof
             _dataOff = true; break;
-          case 2: 
+          case 2:    //kon
             _kidMode = true; break;
-          case 3: 
+          case 3:    //kof
             _kidMode = false; break;
-          case 4: 
+          case 4:    //gon
             _disableGun = false; break;
-          case 5: 
+          case 5:    //gof
             _disableGun = true; break;
-          case 6:
+          case 6:    //sts
+            memset(_packetBuffer, 0, sizeof(_packetBuffer));        //clear the buffer
             strcpy(_packetBuffer, "");
             if (!_dataOff)
               strcat(_packetBuffer, commands[0]);
@@ -72,11 +75,23 @@ void listenForUDP () {
               strcat(_packetBuffer, commands[2]);
             if (!_disableGun)
               strcat(_packetBuffer, commands[4]);
+            if (_manualMode)
+              strcat(_packetBuffer, commands[7]);            
             break;
+          case 7:    //mon
+            _manualMode = true; break;
+          case 8:    //mof
+            _manualMode = false; break;
+          case 9:    //von
+            openValve();
+            break;          
+          case 10:   //vof
+            closeValve();
+            break; 
           default: break;
         }
-        if (i = 6) {
-          sendUDP(_packetBuffer, 9);
+        if (i == 6) {
+          sendUDP(_packetBuffer, 12);
         } else {
           sendUDP(commands[i], 3);
         }
