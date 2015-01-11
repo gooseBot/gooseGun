@@ -42,14 +42,14 @@ void sendUDP(char *response, int responseSize) {
 
 void listenForUDP () {  
   int packetSize = _Udp.parsePacket();       // if there's data available, read a packet
-  char* commands[] = { "don", "dof", "kon", "kof", "gon", "gof", "sts", "mon", "mof", "von", "vof" };
+  char* commands[] = { "don", "dof", "kon", "kof", "gon", "gof", "sts", "mon", "mof", "von", "vof", "trg" };
 
   if(packetSize)
   {  
     memset(_packetBuffer,0,sizeof(_packetBuffer));        //clear the buffer
     _Udp.read(_packetBuffer,UDP_TX_PACKET_MAX_SIZE);      // read the packet into packetBufffer
     //loop the commands looking for a match to the packet
-    for (int i=0;i<11;i++){
+    for (int i=0;i<12;i++){
       if (strcmp(_packetBuffer, (char*)commands[i]) == 0)
       {
         switch (i) 
@@ -88,14 +88,24 @@ void listenForUDP () {
           case 10:   //vof
             closeValve();
             break; 
+          case 11:   //trg
+
+            break;
           default: break;
         }
-        if (i == 6) {
-          sendUDP(_packetBuffer, 12);
-        } else {
-          sendUDP(commands[i], 3);
+        switch (i)
+        {
+          case 6:    
+            sendUDP(_packetBuffer, 12);
+            break;
+          case 11:
+            //receive coordinates
+            break;
+          default:
+            sendUDP(commands[i], 3);
+            break;
         }
-        postDataToAgol(_messages);  //record info about the UDP command
+        //postDataToAgol(_messages);  //record info about the UDP command, commented out to speed up manual mode, TODO: clean up
       }
     }
   }
