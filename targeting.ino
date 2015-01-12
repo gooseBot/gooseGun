@@ -36,6 +36,10 @@ float getAngle(){
   return _angle;
 }
 
+float setAngle(float angle){
+  _angle = angle;
+}
+
 byte getBaseScanByte(int index){
   return _baseScan[index];
 }
@@ -58,6 +62,10 @@ void clearScanArray(){
 
 byte getDistance(){
   return _distance;
+}
+
+byte setDistance(byte distance){
+  _distance = distance;;
 }
 
 long getTotDifferences(){
@@ -199,12 +207,13 @@ void moveServosAndShootTarget()
     adjustedTiltServoAngle = 60;
   if (adjustedTiltServoAngle > 160)
     adjustedTiltServoAngle = 160;  
+
   // move servos to hit target 
   int panAngle = (180-(int)_angle); 
   if (getManualMode()){
     _bottomServo.write(panAngle);               // go to desired position 
     _topServo.write(adjustedTiltServoAngle);    // go to desired position 
-    myDelay(200);                               // wait for servos to finish moving.
+    //myDelay(200);                               // wait for servos to finish moving.
   }  else {
     panAngle -= wiggleAmount;
     adjustedTiltServoAngle -= wiggleAmount;

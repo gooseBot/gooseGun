@@ -24,7 +24,7 @@ void loop()
   if (getManualMode()) {
     manageManualAttack();
   }
-  if (detectMovement(false) && !getDisableGun()) {
+  if (detectMovement(false) && !getDisableGun() && !getManualMode()) {
     manageAttack();
   }
   listenForUDP();                           //is an Android connected?
@@ -46,7 +46,7 @@ void manageAttack() {
     // continue scanning if less than 2 minutes since last target
     //   stop scanning if attack has gone on more than 5 minutes (if not in kid mode)
     //   stop scanning if gun disabled
-    while (((millis() - lastTargetTime) < 120000UL) && !getDisableGun() && (((millis() - attackStartTime) < 300000UL) || getKidMode())) {
+    while (((millis() - lastTargetTime) < 120000UL) && !getDisableGun() && !getManualMode()  && (((millis() - attackStartTime) < 300000UL) || getKidMode())) {
       getScanData(false);                    //get a scan
       processScanData();                     //look for targets   
       if (getDistance() > 0) {
