@@ -50,7 +50,7 @@ void listenForUDP () {
     _Udp.read(_packetBuffer,UDP_TX_PACKET_MAX_SIZE);      // read the packet into packetBufffer
     //loop the commands looking for a match to the packet
     for (int i=0;i<12;i++){
-      if (strcmp(_packetBuffer, (char*)commands[i]) == 0)
+      if (strncmp(_packetBuffer, (char*)commands[i], 3) == 0)
       {
         switch (i) 
         {
@@ -79,9 +79,14 @@ void listenForUDP () {
               strcat(_packetBuffer, commands[7]);            
             break;
           case 7:    //mon
-            _manualMode = true; break;
+            _manualMode = true; 
+            _kidMode = false;
+            _dataOff = true;
+            _disableGun = true;
+            break;
           case 8:    //mof
-            _manualMode = false; break;
+            _manualMode = false; 
+            break;
           case 9:    //von
             openValve();
             break;          
@@ -89,23 +94,28 @@ void listenForUDP () {
             closeValve();
             break; 
           case 11:   //trg
+            //unpack the coordinates if packet is correct size
+            if (strlen(_packetBuffer)==10) {              
 
+            }
             break;
           default: break;
         }
+        // reply in certain cases
         switch (i)
         {
           case 6:    
-            sendUDP(_packetBuffer, 12);
+            sendUDP(_packetBuffer, strlen(_packetBuffer));
             break;
           case 11:
-            //receive coordinates
+            //receive coordinates don't respond
             break;
           default:
             sendUDP(commands[i], 3);
             break;
         }
-        //postDataToAgol(_messages);  //record info about the UDP command, commented out to speed up manual mode, TODO: clean up
+        //commented out to speed up manual mode, TODO: clean up
+        //postDataToAgol(_messages);  //record info about the UDP command
       }
     }
   }

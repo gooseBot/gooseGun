@@ -193,6 +193,7 @@ void moveServosAndShootTarget()
   //  its range of motion is limited to 90 degrees by the pan tilt mechanisim though.
   //  the servo is tilted so it is "level", this seems to be 110 degrees.
   byte adjustedTiltServoAngle = _tiltServoNeutralAngle + rootMinusAngle;
+
   //don't let it get to extremes the servo cant do well
   if (adjustedTiltServoAngle < 60) 
     adjustedTiltServoAngle = 60;
@@ -200,30 +201,34 @@ void moveServosAndShootTarget()
     adjustedTiltServoAngle = 160;  
   // move servos to hit target 
   int panAngle = (180-(int)_angle); 
-  panAngle-=wiggleAmount;
-  adjustedTiltServoAngle-=wiggleAmount;
-  _bottomServo.write(panAngle);               // go to desired position minus wiggle amount degree         
-  _topServo.write(adjustedTiltServoAngle);    // go to desired position minus wiggle amount degree       
-  myDelay(200);                               // wait for servos to finish moving.
-  
-  // will open the valve for about 1 second.  Takes a while for the water to get going.
-  // will also wiggle the two servos in a pattern left right up down a few times
-  openValve();
-  for (int repeat=0; repeat<1; repeat+=1)
-  {
-    for(int wiggle=0; wiggle<(2*wiggleAmount); wiggle+=1)  
-    { 
-      _topServo.write(adjustedTiltServoAngle + wiggle);   
-      _bottomServo.write(panAngle + wiggle);   
-      myDelay(60);
-    } 
-    for(int wiggle=(2*wiggleAmount); wiggle < 0; wiggle-=1)  
-    { 
-      _topServo.write(adjustedTiltServoAngle + wiggle); 
-      _bottomServo.write(panAngle + wiggle);     
-      myDelay(60);
-    } 
+  if (getManualMode()){
+    _bottomServo.write(panAngle);               // go to desired position 
+    _topServo.write(adjustedTiltServoAngle);    // go to desired position 
+    myDelay(200);                               // wait for servos to finish moving.
+  }  else {
+    panAngle -= wiggleAmount;
+    adjustedTiltServoAngle -= wiggleAmount;
+    _bottomServo.write(panAngle);               // go to desired position minus wiggle amount degree         
+    _topServo.write(adjustedTiltServoAngle);    // go to desired position minus wiggle amount degree       
+    myDelay(200);                               // wait for servos to finish moving.  
+    // will open the valve for about 1 second.  Takes a while for the water to get going.
+    // will also wiggle the two servos in a pattern left right up down a few times
+    openValve();
+    for (int repeat = 0; repeat < 1; repeat += 1)
+    {
+      for (int wiggle = 0; wiggle < (2 * wiggleAmount); wiggle += 1)
+      {
+        _topServo.write(adjustedTiltServoAngle + wiggle);
+        _bottomServo.write(panAngle + wiggle);
+        myDelay(60);
+      }
+      for (int wiggle = (2 * wiggleAmount); wiggle < 0; wiggle -= 1)
+      {
+        _topServo.write(adjustedTiltServoAngle + wiggle);
+        _bottomServo.write(panAngle + wiggle);
+        myDelay(60);
+      }
+    }
+    closeValve();
   }
-  closeValve();
-} 
-
+}
