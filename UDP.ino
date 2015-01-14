@@ -2,7 +2,7 @@ static char _packetBuffer[UDP_TX_PACKET_MAX_SIZE];      //buffer to hold incomin
 static boolean _dataOff = false;
 static boolean _kidMode = false;                     // kid mode disables most time outs.    
 static boolean _disableGun = false;
-static boolean _manualMode = true;                
+static boolean _manualMode = false;                
 
 char * getPacketBuffer(){
   return _packetBuffer;
@@ -41,19 +41,15 @@ void sendUDP(char *response, int responseSize) {
 }
 
 void listenForUDP () {  
-  int packetSize = _Udp.parsePacket();       // if there's data available, read a packet
   char* commands[] = { "don", "dof", "kon", "kof", "gon", "gof", "sts", "mon", "mof", "von", "vof", "trg" };
 
-  if(packetSize)
-  {  
-    memset(_packetBuffer,0,sizeof(_packetBuffer));        //clear the buffer
-    _Udp.read(_packetBuffer,UDP_TX_PACKET_MAX_SIZE);      // read the packet into packetBufffer
+  while (_Udp.parsePacket()) {
+    memset(_packetBuffer, 0, sizeof(_packetBuffer));        //clear the buffer
+    _Udp.read(_packetBuffer, UDP_TX_PACKET_MAX_SIZE);      // read the packet into packetBufffer
     //loop the commands looking for a match to the packet
-    for (int i=0;i<12;i++){
-      if (strncmp(_packetBuffer, (char*)commands[i], 3) == 0)
-      {
-        switch (i) 
-        {
+    for (int i = 0; i < 12; i++) {
+      if (strncmp(_packetBuffer, (char*)commands[i], 3) == 0) {
+        switch (i) {
           case 0:    //don
             _dataOff = false; break;
           case 1:    //dof
@@ -71,38 +67,35 @@ void listenForUDP () {
             strcpy(_packetBuffer, "");
             if (!_dataOff)
               strcat(_packetBuffer, commands[0]);
-            if (_kidMode) 
+            if (_kidMode)
               strcat(_packetBuffer, commands[2]);
             if (!_disableGun)
               strcat(_packetBuffer, commands[4]);
             if (_manualMode)
-              strcat(_packetBuffer, commands[7]);            
+              strcat(_packetBuffer, commands[7]);
             break;
           case 7:    //mon             
-            controlNozzelServos(true);               //enable servos and position nozzel
-            _manualMode = true;
-            break;
+            _manualMode = true; break;
           case 8:    //mof             
-            controlNozzelServos(false);               //enable servos and position nozzel
-            _manualMode = false;
-            break;
+            _manualMode = false; break;
           case 9:    //von
-            openValve();
-            break;          
+            if (_manualMode == true && _disableGun == false) openValve();
+            break;
           case 10:   //vof
-            closeValve();
-            break; 
+            if (_manualMode == true && _disableGun == false) closeValve();
+            break;
           case 11:   //trg
-            //unpack the coordinates if packet is correct size
-            if (strlen(_packetBuffer)==10) {              
-              char angle[5];
-              char distance[2];
-              memcpy(angle, &_packetBuffer[3], 5);
-              memcpy(distance, &_packetBuffer[8], 2);
-              setAngle(atof(angle));
-              //setDistance(atoi(distance));
-              setDistance(15);
-              moveServosAndShootTarget();
+            if (_manualMode == true && _disableGun == false) {      //unpack the coordinates if packet is correct size
+              if (strlen(_packetBuffer) == 10) {
+                char angle[5];
+                char distance[2];
+                memcpy(angle, &_packetBuffer[3], 5);
+                memcpy(distance, &_packetBuffer[8], 2);
+                setAngle(atof(angle));
+                //setDistance(atoi(distance));
+                setDistance(15);
+                moveServosAndShootTarget();
+              }
             }
             break;
           default: break;
@@ -110,15 +103,15 @@ void listenForUDP () {
         // reply in certain cases
         switch (i)
         {
-          case 6:    
-            sendUDP(_packetBuffer, strlen(_packetBuffer));
-            break;
-          case 11:
-            //receive coordinates don't respond
-            break;
-          default:
-            sendUDP(commands[i], 3);
-            break;
+        case 6:
+          sendUDP(_packetBuffer, strlen(_packetBuffer));
+          break;
+        case 11:
+          //receive coordinates don't respond
+          break;
+        default:
+          sendUDP(commands[i], 3);
+          break;
         }
         //commented out to speed up manual mode, TODO: clean up
         //postDataToAgol(_messages);  //record info about the UDP command

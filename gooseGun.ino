@@ -21,13 +21,15 @@ void setup()
 
 void loop()                          
 {
-  if (getManualMode()) {
+  if (getDisableGun()) {
+    //nothing to do if gun is disabled. Doing this eleminates the 1 second needed for detecting movment
+    //  this way UDP runs faster and will be more resiliant a misbehaving client sending to much UDP
+  } else if (getManualMode()){
     manageManualAttack();
+  } else if (detectMovement(false)){
+    manageAttack();          //if not disabled or in manual mode then in auto mode
   }
-  if (detectMovement(false) && !getDisableGun() && !getManualMode()) {
-    manageAttack();
-  }
-  listenForUDP();                           //is an Android connected?
+  listenForUDP();            //is an Android connected?
 }
 
 void manageAttack() {
@@ -70,8 +72,10 @@ void manageAttack() {
 }
 
 void manageManualAttack() {
+    controlNozzelServos(true);               //enable servos and position nozzel
     do
     {
       listenForUDP();                           //is an Android connected?
     } while (getManualMode());
+    controlNozzelServos(false);               //enable servos and position nozzel
 }
