@@ -73,8 +73,7 @@ void manageAttack() {
 
 void manageManualAttack() {
     controlNozzelServos(true);               //enable servos and position nozzel
-    do
-    {
+    do {
       listenForUDP();                           //is an Android connected?
     } while (getManualMode());
     controlNozzelServos(false);               //enable servos and position nozzel

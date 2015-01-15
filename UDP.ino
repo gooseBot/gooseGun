@@ -2,7 +2,7 @@ static char _packetBuffer[UDP_TX_PACKET_MAX_SIZE];      //buffer to hold incomin
 static boolean _dataOff = false;
 static boolean _kidMode = false;                     // kid mode disables most time outs.    
 static boolean _disableGun = false;
-static boolean _manualMode = false;                
+static boolean _manualMode = true;                
 
 char * getPacketBuffer(){
   return _packetBuffer;
@@ -87,13 +87,12 @@ void listenForUDP () {
           case 11:   //trg
             if (_manualMode == true && _disableGun == false) {      //unpack the coordinates if packet is correct size
               if (strlen(_packetBuffer) == 10) {
-                char angle[5];
-                char distance[2];
+                char angle[6];
+                char distance[3];
                 memcpy(angle, &_packetBuffer[3], 5);
                 memcpy(distance, &_packetBuffer[8], 2);
                 setAngle(atof(angle));
-                //setDistance(atoi(distance));
-                setDistance(15);
+                setDistance(atoi(distance));
                 moveServosAndShootTarget();
               }
             }
