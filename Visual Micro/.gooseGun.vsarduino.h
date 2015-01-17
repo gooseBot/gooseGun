@@ -41,7 +41,7 @@ extern "C" void __cxa_pure_virtual() {;}
 
 //
 //
-void manageAttack();
+void manageAutoAttack();
 void manageManualAttack();
 void generateUUID();
 void postBaseScanToAgol();
@@ -55,10 +55,12 @@ int sendTargetData();
 int sendMessage();
 void getStatePlaneCoords(int radius, float angleInDeg, float &pointX, float &pointY);
 char * getPacketBuffer();
+unsigned long getLastTrgCmdReceivedTime();
 boolean getDataOff();
 boolean getKidMode();
 boolean getDisableGun();
 boolean getManualMode();
+boolean setManualMode(boolean mode);
 void initializeUPD();
 void sendUDP(char *response, int responseSize);
 void listenForUDP ();

@@ -213,7 +213,6 @@ void moveServosAndShootTarget()
   if (getManualMode()){
     _bottomServo.write(panAngle);               // go to desired position 
     _topServo.write(adjustedTiltServoAngle);    // go to desired position 
-    //myDelay(200);                               // wait for servos to finish moving.
   }  else {
     panAngle -= wiggleAmount;
     adjustedTiltServoAngle -= wiggleAmount;

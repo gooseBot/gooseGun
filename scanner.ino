@@ -1,4 +1,4 @@
-static Servo _doorServo;              //must be global
+static Servo _doorServo;              //must be static
 
 void captureBaseScan() {
   generateUUID();

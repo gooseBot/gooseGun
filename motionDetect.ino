@@ -18,7 +18,6 @@ boolean detectMovement(boolean resetRollingAvgNumbers)
   static int readingCount = 0;
   static int zero = 0;
 
-  
   // reset the numbers used to compute rolling average, needed after an attack is done
   //  Im reusing the scan array to compute the rolling average
   //  this works since there is an enforced 10min rest time between attacks
@@ -31,8 +30,6 @@ boolean detectMovement(boolean resetRollingAvgNumbers)
     zero=0;    
     return false;    
   }
-  
-  //if (_disableGun) {return false;}  
     
   // get num of pulses for one second from the xband
   unsigned long starttime = millis();      //going to count for a fixed time

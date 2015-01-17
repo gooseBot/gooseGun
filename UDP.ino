@@ -2,10 +2,15 @@ static char _packetBuffer[UDP_TX_PACKET_MAX_SIZE];      //buffer to hold incomin
 static boolean _dataOff = false;
 static boolean _kidMode = false;                     // kid mode disables most time outs.    
 static boolean _disableGun = false;
-static boolean _manualMode = true;                
+static boolean _manualMode = false;     
+static unsigned long _lastTrgCmdReceivedTime = 0UL;
 
 char * getPacketBuffer(){
   return _packetBuffer;
+}
+
+unsigned long getLastTrgCmdReceivedTime(){
+  return _lastTrgCmdReceivedTime;
 }
 
 boolean getDataOff(){
@@ -22,6 +27,10 @@ boolean getDisableGun(){
 
 boolean getManualMode(){
   return _manualMode;
+}
+
+boolean setManualMode(boolean mode){
+  _manualMode = mode;
 }
 
 void initializeUPD() {
@@ -42,11 +51,12 @@ void sendUDP(char *response, int responseSize) {
 
 void listenForUDP () {  
   char* commands[] = { "don", "dof", "kon", "kof", "gon", "gof", "sts", "mon", "mof", "von", "vof", "trg" };
+  
 
   while (_Udp.parsePacket()) {
     memset(_packetBuffer, 0, sizeof(_packetBuffer));        //clear the buffer
     _Udp.read(_packetBuffer, UDP_TX_PACKET_MAX_SIZE);      // read the packet into packetBufffer
-    //loop the commands looking for a match to the packet
+    //loop the commands looking for a match to the packet 
     for (int i = 0; i < 12; i++) {
       if (strncmp(_packetBuffer, (char*)commands[i], 3) == 0) {
         switch (i) {
@@ -65,7 +75,7 @@ void listenForUDP () {
           case 6:    //sts
             memset(_packetBuffer, 0, sizeof(_packetBuffer));        //clear the buffer
             strcpy(_packetBuffer, "");
-            if (!_dataOff)
+            if (!_dataOff)                                          //fill the buffer with gun status
               strcat(_packetBuffer, commands[0]);
             if (_kidMode)
               strcat(_packetBuffer, commands[2]);
@@ -75,7 +85,9 @@ void listenForUDP () {
               strcat(_packetBuffer, commands[7]);
             break;
           case 7:    //mon             
-            _manualMode = true; break;
+            _manualMode = true; 
+            _lastTrgCmdReceivedTime = millis();                    //init time out for man mode, dont want to burn out servos
+            break;
           case 8:    //mof             
             _manualMode = false; break;
           case 9:    //von
@@ -84,7 +96,7 @@ void listenForUDP () {
           case 10:   //vof
             if (_manualMode == true && _disableGun == false) closeValve();
             break;
-          case 11:   //trg
+          case 11:   //trg packet contains target coordinates when in manual mode  trgAaaa.aDd (Aaa.a=angle, Dd=distance)
             if (_manualMode == true && _disableGun == false) {      //unpack the coordinates if packet is correct size
               if (strlen(_packetBuffer) == 10) {
                 char angle[6];
@@ -94,23 +106,15 @@ void listenForUDP () {
                 setAngle(atof(angle));
                 setDistance(atoi(distance));
                 moveServosAndShootTarget();
+                _lastTrgCmdReceivedTime = millis();
               }
             }
             break;
           default: break;
         }
-        // reply in certain cases
-        switch (i)
-        {
-        case 6:
+        // reply with what was sent and with status for sts command.  dont reply for trg commands would slow down action
+        if (i != 11){
           sendUDP(_packetBuffer, strlen(_packetBuffer));
-          break;
-        case 11:
-          //receive coordinates don't respond
-          break;
-        default:
-          sendUDP(commands[i], 3);
-          break;
         }
         //commented out to speed up manual mode, TODO: clean up
         //postDataToAgol(_messages);  //record info about the UDP command

@@ -10,7 +10,7 @@
 EthernetUDP _Udp;                 //must be a global and declared before ethernet client, don't know why
 EthernetClient _ethernetClient;   //must be a global
 double _xBandBuckets[] = { 0, 1, 2, 3, 5, 10, 20, 1000 };
-Histogram _hist(8, _xBandBuckets); //motion sensor data
+Histogram _hist(8, _xBandBuckets); //motion sensor data must be global
 
 void setup()               
 {
@@ -22,17 +22,17 @@ void setup()
 void loop()                          
 {
   if (getDisableGun()) {
-    //nothing to do if gun is disabled. Doing this eleminates the 1 second needed for detecting movment
-    //  this way UDP runs faster and will be more resiliant a misbehaving client sending to much UDP
+    //nothing to do if gun is disabled.
+    delay(10);               //might be needed just to prevent a strange lockup after an hour or so disabled
   } else if (getManualMode()){
     manageManualAttack();
   } else if (detectMovement(false)){
-    manageAttack();          //if not disabled or in manual mode then in auto mode
+    manageAutoAttack();          //if not disabled or in manual mode then in auto mode
   }
   listenForUDP();            //is an Android connected?
 }
 
-void manageAttack() {
+void manageAutoAttack() {
   unsigned long lastTargetTime = 0;
   static unsigned long lastAttackTime = 0;
   static unsigned long disarmTimeSpan = 0;
@@ -75,6 +75,9 @@ void manageManualAttack() {
     controlNozzelServos(true);               //enable servos and position nozzel
     do {
       listenForUDP();                           //is an Android connected?
-    } while (getManualMode());
+      if ((millis() - getLastTrgCmdReceivedTime()) > 60000) {
+        setManualMode(false);                  //disable if nothing for a minute
+      }
+    } while (getManualMode());  
     controlNozzelServos(false);               //enable servos and position nozzel
 }
