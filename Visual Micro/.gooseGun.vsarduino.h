@@ -64,6 +64,7 @@ boolean setManualMode(boolean mode);
 void initializeUPD();
 void sendUDP(char *response, int responseSize);
 void listenForUDP ();
+void prepareStatusResponse();
 void myDelay(int mseconds);
 float getPulsesPerSecAvg();
 float getPulsesPerSec();
