@@ -88,7 +88,7 @@ void controlDoor(boolean doorOpen) {
 	    _doorServo.write(90);
 	    myDelay(500);
 	  } 
-	  _doorServo.write(10);
+	  _doorServo.write(0);
   }  
   myDelay(1500);           //this delay is needed or door won't close/open all the way
   _doorServo.detach();
