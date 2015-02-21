@@ -50,6 +50,13 @@ void sendUDP(char *response, int responseSize) {
   _Udp.endPacket(); 
 }
 
+void sendUDPcamTrigger(char *response, int responseSize) {
+  IPAddress ip(255, 255, 255, 255);            // broadcast local network
+  _Udp.beginPacket(ip, 2004);
+  _Udp.write(response, responseSize);
+  _Udp.endPacket();
+}
+
 void listenForUDP () {  
   while (_Udp.parsePacket()) {
     memset(_packetBuffer, 0, sizeof(_packetBuffer));        //clear the buffer
@@ -81,7 +88,9 @@ void listenForUDP () {
             }
             break;
           case 8:    //mof             
-            _manualMode = false; break;
+            _manualMode = false; 
+            sendUDPcamTrigger("12345", 5);
+            break;
           case 9:    //von
             if (_manualMode == true && _disableGun == false) openValve();
             break;

@@ -1,6 +1,6 @@
 const float _nozzelVelocity = 35.0;        //feet/sec - Seems accurate for yard
 //const float _nozzelVelocity = 20.0;        //feet/sec - indoor testing
-const float _nozzelAboveGroundDistance = -3;
+const float _nozzelAboveGroundDistance = -7;
 const byte _tiltServoNeutralAngle = 125;
 const float _gravity = 32.0;               //feet/sec/sec
 const byte _valveMosfetPin = 7;

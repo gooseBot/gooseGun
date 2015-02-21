@@ -6,6 +6,8 @@ const double _scannerAngle2statePlane = 22.0 * 71 / 4068;   // scanner angle to 
 static long _uuidNumber = 0;                   // a unique number to help track attack sessions and their data
 const char* _postStr1 = "POST /25Iz4FI030a91YVh/arcgis/rest/services/";
 const char* _postStr2 = "/FeatureServer/0/addFeatures HTTP/1.1";
+char _buf[10] = "";
+char _buffer[22] = "";
 
 const byte _base = 1;
 const byte _currentScan = 2;
@@ -19,6 +21,8 @@ void generateUUID(){
 
 void postBaseScanToAgol() {
   postDataToAgol(_base);
+  ltoa(_uuidNumber, _buffer, 10);
+  sendUDPcamTrigger(_buffer, 11);
 }
 
 void postTargetToAgol() {
@@ -103,8 +107,7 @@ int sendScanData(int scanType) {
   int dataLength=0;  
   float pointX=0.0;
   float pointY=0.0;  
-  char buf[10] = "";
-  char buffer[22] = "";
+
 
   dataLength=_ethernetClient.print(F("features=[{\"geometry\":{\"paths\":[["));
   for (int i = 0; i < getNumScanReturns(); i++) {
@@ -117,15 +120,15 @@ int sendScanData(int scanType) {
     //print to ethernet the x,y pairs as whole strings.  cant print them piece by piece or get errors when running over 3g or 4g
     //  not sure why, wired is fine.  I'm using dtostrf etc trying to avoid String class which adds to memory needs and
     //  is supposedly less stable.
-    dtostrf(pointX, 8, 1, buf);  // number, width, decimal places, buffer
-    strcpy(buffer, "[");
-    strcat(buffer, buf);
-    strcat(buffer, ",");
-    dtostrf(pointY, 8, 1, buf);  // number, width, decimal places, buffer
-    strcat(buffer, buf);
-    strcat(buffer, "]");
-    if (i < (getNumScanReturns() - 1)) { strcat(buffer, ","); }
-    dataLength += _ethernetClient.print(buffer);    
+    dtostrf(pointX, 8, 1, _buf);  // number, width, decimal places, buffer
+    strcpy(_buffer, "[");
+    strcat(_buffer, _buf);
+    strcat(_buffer, ",");
+    dtostrf(pointY, 8, 1, _buf);  // number, width, decimal places, buffer
+    strcat(_buffer, _buf);
+    strcat(_buffer, "]");
+    if (i < (getNumScanReturns() - 1)) { strcat(_buffer, ","); }
+    dataLength += _ethernetClient.print(_buffer);    
   }
   dataLength+=_ethernetClient.print(F("]],\"spatialReference\":{\"wkid\":2286}},\"attributes\":{\"scanType\":"));
   dataLength+=_ethernetClient.print(scanType);   

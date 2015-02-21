@@ -16,6 +16,7 @@ void setup()
 {
   initializeUPD();       
   initializeTargeting();
+
   controlScanner(false);   //ensure scanner is also off
 }
 

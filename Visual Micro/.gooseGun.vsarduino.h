@@ -18,6 +18,9 @@
 #define __avr__
 #define F_CPU 16000000L
 #define __cplusplus
+#define GCC_VERSION 40302
+#define ARDUINO_ARCH_AVR
+#define ARDUINO_AVR_UNO
 #define __inline__
 #define __asm__(x)
 #define __extension__
@@ -27,80 +30,40 @@
 #define __asm__ 
 #define __volatile__
 
-#define __builtin_va_list
+typedef void *__builtin_va_list;
 #define __builtin_va_start
 #define __builtin_va_end
-#define __DOXYGEN__
+//#define __DOXYGEN__
 #define __attribute__(x)
 #define NOINLINE __attribute__((noinline))
 #define prog_void
 #define PGM_VOID_P int
+
+#define NEW_H
             
 typedef unsigned char byte;
 extern "C" void __cxa_pure_virtual() {;}
-
-//
-//
-void manageAutoAttack();
-void manageManualAttack();
-void generateUUID();
-void postBaseScanToAgol();
-void postTargetToAgol();
-void postMessageToAgol();
-void postDataToAgol(byte scanType);
-void sendPostURLheader(char * serviceName);
-int sendData(int scanType);
-int sendScanData(int scanType);
-int sendTargetData();
-int sendMessage();
-void getStatePlaneCoords(int radius, float angleInDeg, float &pointX, float &pointY);
-char * getPacketBuffer();
-unsigned long getLastTrgCmdReceivedTime();
-boolean getDataOff();
-boolean getKidMode();
-boolean getDisableGun();
-boolean getManualMode();
-boolean setManualMode(boolean mode);
-void initializeUPD();
-void sendUDP(char *response, int responseSize);
-void listenForUDP ();
-void prepareStatusResponse();
-void myDelay(int mseconds);
-float getPulsesPerSecAvg();
-float getPulsesPerSec();
-boolean detectMovement(boolean resetRollingAvgNumbers);
-void onPulse();
-void captureBaseScan();
-void getScanData (boolean getBaseScan);
-void controlDoor(boolean doorOpen);
-void controlScanner(boolean scannerOn);
-void initializeTargeting();
-int getNumScanReturns();
-float getMaxRange();
-float getAngle();
-float setAngle(float angle);
-byte getBaseScanByte(int index);
-void setBaseScanByte(int index, byte value);
-byte getScanByte(int index);
-void setScanByte(int index, byte value);
-void clearScanArray();
-byte getDistance();
-byte setDistance(byte distance);
-long getTotDifferences();
-float getArcLength();
-void controlNozzelServos(boolean turnOn);
-void closeValve();
-void openValve();
-void processScanData();
-void moveServosAndShootTarget();
-
-#include "C:\Program Files (x86)\Arduino\hardware\arduino\cores\arduino\arduino.h"
-#include "C:\Program Files (x86)\Arduino\hardware\arduino\variants\standard\pins_arduino.h" 
-#include "C:\Users\Eric\Documents\Arduino\gooseGun\gooseGun.ino"
-#include "C:\Users\Eric\Documents\Arduino\gooseGun\Agol.ino"
-#include "C:\Users\Eric\Documents\Arduino\gooseGun\UDP.ino"
-#include "C:\Users\Eric\Documents\Arduino\gooseGun\Utility.ino"
-#include "C:\Users\Eric\Documents\Arduino\gooseGun\motionDetect.ino"
-#include "C:\Users\Eric\Documents\Arduino\gooseGun\scanner.ino"
-#include "C:\Users\Eric\Documents\Arduino\gooseGun\targeting.ino"
+#include <arduino.h>
+#include <pins_arduino.h> 
+#undef F
+#define F(string_literal) ((const PROGMEM char *)(string_literal))
+#undef cli
+#define cli()
+#define pgm_read_byte(address_short)
+#define pgm_read_word(address_short)
+#define pgm_read_word2(address_short)
+#define digitalPinToPort(P)
+#define digitalPinToBitMask(P) 
+#define digitalPinToTimer(P)
+#define analogInPinToBit(P)
+#define portOutputRegister(P)
+#define portInputRegister(P)
+#define portModeRegister(P)
+#include <gooseGun.ino>
+#include <Agol.ino>
+#include <UDP.ino>
+#include <Utility.ino>
+#include <motionDetect.ino>
+#include <scanner.ino>
+#include <targeting.ino>
 #endif
