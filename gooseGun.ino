@@ -40,6 +40,7 @@ void manageAutoAttack() {
   unsigned long attackStartTime = 0;
   // if scanner off, and we have motion, and more then 10min since last attack, then turn on scanner
   if (((millis() - lastAttackTime) > disarmTimeSpan) || getKidMode()) {
+    if (!getDataOff()) triggerCamera();       //done now since it takes 9 seconds to start scanner and get basescan
     controlScanner(true);                     // turn on scanner
     //keep track of scanner on time, will turn it off if nothing happens for a while
     lastTargetTime = millis();               //keep track of the last shot time

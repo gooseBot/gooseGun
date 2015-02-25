@@ -89,7 +89,7 @@ void listenForUDP () {
             break;
           case 8:    //mof             
             _manualMode = false; 
-            sendUDPcamTrigger("12345", 5);
+            sendUDPcamTrigger("1234567890", 11);
             break;
           case 9:    //von
             if (_manualMode == true && _disableGun == false) openValve();

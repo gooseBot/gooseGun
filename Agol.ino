@@ -19,10 +19,14 @@ void generateUUID(){
   _uuidNumber = TrueRandom.random();            // setup a random (for this date at least) ID for this session.
 }
 
-void postBaseScanToAgol() {
-  postDataToAgol(_base);
+void triggerCamera() {
+  generateUUID();                 //the number will be used for AGOL uploads to link everything together
   ltoa(_uuidNumber, _buffer, 10);
   sendUDPcamTrigger(_buffer, 11);
+}
+
+void postBaseScanToAgol() {
+  postDataToAgol(_base);
 }
 
 void postTargetToAgol() {

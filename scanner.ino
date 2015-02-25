@@ -1,7 +1,6 @@
 static Servo _doorServo;              //must be static
 
 void captureBaseScan() {
-  generateUUID();
   getScanData(_base);
 }
 
