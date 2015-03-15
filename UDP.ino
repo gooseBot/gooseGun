@@ -4,7 +4,7 @@ static boolean _kidMode = false;                     // kid mode disables most t
 static boolean _disableGun = false;
 static boolean _manualMode = false;     
 static unsigned long _lastTrgCmdReceivedTime = 0UL;
-char* _commands[] = { "don", "dof", "kon", "kof", "gon", "gof", "sts", "mon", "mof", "von", "vof", "trg" };
+char* _commands[] = { "don", "dof", "kon", "kof", "gon", "gof", "sts", "mon", "mof", "von", "vof", "trg", "gde"};
 
 char * getPacketBuffer(){
   return _packetBuffer;
@@ -62,7 +62,7 @@ void listenForUDP () {
     memset(_packetBuffer, 0, sizeof(_packetBuffer));        //clear the buffer
     _Udp.read(_packetBuffer, UDP_TX_PACKET_MAX_SIZE);      // read the packet into packetBufffer
     //loop the commands looking for a match to the packet 
-    for (int i = 0; i < 12; i++) {
+    for (int i = 0; i < 13; i++) {
       if (strncmp(_packetBuffer, (char*)_commands[i], 3) == 0) {
         switch (i) {
           case 0:    //don
@@ -111,6 +111,9 @@ void listenForUDP () {
               }
             }
             break;
+          case 12:   //gde goose dectector event
+            setGooseDectectorEvent();
+            break;          
           default: break;
         }
         // reply with what was sent and with status for sts command.  dont reply for trg commands would slow down action

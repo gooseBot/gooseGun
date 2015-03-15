@@ -1,6 +1,7 @@
 //static float _stdDeviationPulseRate = 0;
 static float _pulsesPerSecAvg = 2;
 static volatile int _pulsesPerSec = 0;
+static boolean _gooseDectectorEvent = false;
 
 float getPulsesPerSecAvg(){
   return _pulsesPerSecAvg;
@@ -8,6 +9,10 @@ float getPulsesPerSecAvg(){
 
 float getPulsesPerSec(){
   return _pulsesPerSec;
+}
+
+void setGooseDectectorEvent(){
+  _gooseDectectorEvent = true;
 }
 
 boolean detectMovement(boolean resetRollingAvgNumbers)
@@ -41,8 +46,11 @@ boolean detectMovement(boolean resetRollingAvgNumbers)
   }
   detachInterrupt(1);    
 
-  //if new value is over threshold then return that, no other work to do.
-  if ((float)_pulsesPerSec > _pulsesPerSecAvg) {return true;}
+  //if new value is over threshold or UPD message from goose dectector camera
+  if (((float)_pulsesPerSec > _pulsesPerSecAvg) || _gooseDectectorEvent) { 
+    _gooseDectectorEvent = false;
+    return true; 
+  }
 
   _hist.add(_pulsesPerSec);                  // add current rate to the histogram, including zeros
   // update the rolling average but dont include the zeros, skews the result too much.
