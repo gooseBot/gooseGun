@@ -44,6 +44,9 @@ void initializeUPD() {
   _Udp.begin(8888);
 }
 
+
+//TODO: combine sendUDP and sendUDPcamTrigger.  
+// Add ability to broadcast a "cancel" command if gun never attacks.  This would keep the videos from stacking up
 void sendUDP(char *response, int responseSize) {
   _Udp.beginPacket(_Udp.remoteIP(), _Udp.remotePort());
   _Udp.write(response, responseSize);  
