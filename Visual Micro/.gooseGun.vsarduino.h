@@ -47,6 +47,8 @@ extern "C" void __cxa_pure_virtual() {;}
 #include <pins_arduino.h> 
 #undef F
 #define F(string_literal) ((const PROGMEM char *)(string_literal))
+#undef PSTR
+#define PSTR(string_literal) ((const PROGMEM char *)(string_literal))
 #undef cli
 #define cli()
 #define pgm_read_byte(address_short)
