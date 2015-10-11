@@ -14,7 +14,10 @@ float getPulsesPerSec(){
 void setGooseDectectorEvent(){
   //if the current threshold is high it is probably raining
   //  the goose dectector has trouble with rain
-  if (_pulsesPerSecAvg < 15.0) _gooseDectectorEvent = true;
+  if (_pulsesPerSecAvg < 15.0) {
+    triggerCamera();        //turn around and brodcast the event to all listeners
+    _gooseDectectorEvent = true;
+  }
 }
 
 boolean detectMovement(boolean resetRollingAvgNumbers)

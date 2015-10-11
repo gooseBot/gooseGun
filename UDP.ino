@@ -44,8 +44,6 @@ void initializeUPD() {
   _Udp.begin(8888);
 }
 
-
-//TODO: combine sendUDP and sendUDPcamTrigger.  
 // Add ability to broadcast a "cancel" command if gun never attacks.  This would keep the videos from stacking up
 void sendUDP(char *response, int responseSize) {
   _Udp.beginPacket(_Udp.remoteIP(), _Udp.remotePort());
@@ -92,7 +90,6 @@ void listenForUDP () {
             break;
           case 8:    //mof             
             _manualMode = false; 
-            sendUDPcamTrigger("1234567890", 11);
             break;
           case 9:    //von
             if (_manualMode == true && _disableGun == false) openValve();
@@ -114,8 +111,8 @@ void listenForUDP () {
               }
             }
             break;
-          case 12:   //gde goose dectector event
-            setGooseDectectorEvent();
+          case 12:                   //gde goose dectector event
+            setGooseDectectorEvent();            
             break;          
           default: break;
         }
@@ -124,6 +121,7 @@ void listenForUDP () {
           prepareStatusResponse();
           sendUDP(_packetBuffer, strlen(_packetBuffer));
         }
+       
         //commented out to speed up manual mode, TODO: clean up
         //postDataToAgol(_messages);  //record info about the UDP command
       }

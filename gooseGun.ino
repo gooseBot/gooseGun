@@ -39,8 +39,11 @@ void manageAutoAttack() {
   static unsigned long disarmTimeSpan = 0;
   unsigned long attackStartTime = 0;
   // if scanner off, and we have motion, and more then 10min since last attack, then turn on scanner
-  if (((millis() - lastAttackTime) > disarmTimeSpan) || getKidMode()) {
-    if (!getDataOff()) triggerCamera();       //done now since it takes 9 seconds to start scanner and get basescan
+  if (((millis() - lastAttackTime) > disarmTimeSpan) || getKidMode()) {    
+    if (!getDataOff()) { 
+      generateUUID();
+      triggerCamera();   //done now since it takes 9 seconds to start scanner and get basescan
+    }       
     controlScanner(true);                     // turn on scanner
     //keep track of scanner on time, will turn it off if nothing happens for a while
     lastTargetTime = millis();               //keep track of the last shot time
@@ -56,7 +59,10 @@ void manageAutoAttack() {
       if (getDistance() > 0) {
         lastTargetTime = millis();
         moveServosAndShootTarget();
-        if (!getDataOff()) postTargetToAgol();     // if shot at something then post the fact
+        if (!getDataOff()) {    // if shot at something then post the fact
+          triggerCamera();
+          postTargetToAgol(); 
+        }     
       }
       listenForUDP();                           //is an Android connected?
     }
@@ -64,11 +70,12 @@ void manageAutoAttack() {
     controlScanner(false);                 // turn off the scanner 
     detectMovement(true);         //reset the running average used to trigger a detection 
     if (getDisableGun()) {
-      disarmTimeSpan = 0UL;  //set disarm time period to 0 min if gun was manually disabled, avoids disarm when renabled             
+      disarmTimeSpan = 0UL;          //set disarm time period to 0 min if gun was manually disabled, avoids disarm when renabled             
     } else {
-      disarmTimeSpan = 600000UL;         //set disarm time period to 10 min if not manually disabled  
+      disarmTimeSpan = 600000UL;      //set disarm time period to 10 min if not manually disabled  
     }
-    lastAttackTime = millis();              //reset last attack time 
+    lastAttackTime = millis();         //reset last attack time 
+    resetUUID();                       //set to zero so response to next goose detect event is reset
     postMessageToAgol();
   }
 }

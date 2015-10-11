@@ -19,10 +19,17 @@ void generateUUID(){
   _uuidNumber = TrueRandom.random();            // setup a random (for this date at least) ID for this session.
 }
 
+long getUUID(){
+  return _uuidNumber;
+}
+
+void resetUUID(){
+  _uuidNumber = 0;
+}
+
 void triggerCamera() {
-  generateUUID();                 //the number will be used for AGOL uploads to link everything together
   ltoa(_uuidNumber, _buffer, 10);
-  sendUDPcamTrigger(_buffer, 11);
+  sendUDPcamTrigger(_buffer, 11);               //notify any goosecam clients
 }
 
 void postBaseScanToAgol() {
